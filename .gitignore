@@ -1,0 +1,36 @@
+# ---- Sensitive / local only (NEVER commit) ----
+serveur.txt
+*.pem
+*.key
+*.ppk
+.env
+.env.*
+credentials*.json
+tunnel.json
+
+# ---- Local research / notes (all .md except README are excluded) ----
+*.md
+!README.md
+annnces.txt
+idees.txt
+
+# ---- Dependencies / build ----
+node_modules/
+dist/
+build/
+.next/
+.vercel/
+
+# ---- Harness / local prototypes ----
+.claude/
+mockup.html
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ---- Logs ----
+*.log
+npm-debug.log*
