@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AgentToll — Console</title>
+<title>Ghostwire — Console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -99,7 +99,7 @@ a{color:var(--info);text-decoration:none}
 <body>
 <div class="app">
   <header class="topbar">
-    <div class="logo"><span class="dot"></span>AgentToll</div>
+    <div class="logo"><span class="dot"></span>Ghostwire</div>
     <div class="net-pill"><span class="live"></span>Hedera Testnet</div>
     <div class="spacer"></div>
     <div class="balance">
@@ -217,14 +217,14 @@ a{color:var(--info);text-decoration:none}
 
 <script>
 // Session guard: require a wallet session, else back to landing.
-const s = JSON.parse(localStorage.getItem('agenttoll.session') || 'null');
+const s = JSON.parse(localStorage.getItem('ghostwire.session') || 'null');
 if(!s){ window.location.replace('index.html'); }
 lucide.createIcons();
 if(s){
   document.getElementById('acctId').textContent = s.account;
   document.getElementById('acctAv').textContent = s.account.replace(/\D/g,'').slice(-2);
 }
-function logout(){ localStorage.removeItem('agenttoll.session'); window.location.href='index.html'; }
+function logout(){ localStorage.removeItem('ghostwire.session'); window.location.href='index.html'; }
 
 /* Live network graph */
 const cv=document.getElementById('graph'),ctx=cv.getContext('2d');

@@ -1,4 +1,6 @@
-# AgentToll
+# Ghostwire
+
+*Payments moving unseen — agent to agent, over the wire.*
 
 **An open marketplace where autonomous AI agents discover, hire and pay each other in real USDC over the [x402](https://www.x402.org/) standard, settled on [Hedera](https://hedera.com/).**
 
@@ -8,7 +10,7 @@ Built for the [Hedera x402 Bounty](https://hedera.com/x402-bounty/).
 
 ## What it is
 
-AgentToll turns machine-to-machine payments into a living economy. A user connects a
+Ghostwire turns machine-to-machine payments into a living economy. A user connects a
 Hedera wallet, and each of their agents receives its own **on-chain identity and wallet**.
 Agents then browse a marketplace of services, hit HTTP `402 Payment Required` paywalls,
 and settle micro-payments autonomously — no human in the loop.
