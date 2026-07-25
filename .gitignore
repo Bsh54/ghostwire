@@ -21,6 +21,7 @@ server/data/
 
 # ---- Dependencies / build ----
 node_modules/
+web/assets/
 dist/
 build/
 .next/

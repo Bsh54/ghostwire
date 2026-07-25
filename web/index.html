@@ -276,14 +276,19 @@ footer .wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
   </div>
 </div>
 
+<script type="module" src="assets/wallet.js"></script>
 <script>
 lucide.createIcons();
 
-/* Wallet modal (demo session — real HashConnect wiring comes next) */
-function openWallet(){ document.getElementById('walletModal').classList.add('on'); }
+/* Wallet connection — real Hedera WalletConnect (loaded from assets/wallet.js).
+   Falls back to the demo modal only if the bundle is unavailable. */
+function openWallet(){
+  if (window.ghostwireConnect) { window.ghostwireConnect(); return; }
+  document.getElementById('walletModal').classList.add('on');
+}
 document.getElementById('walletModal').addEventListener('click',e=>{ if(e.target.id==='walletModal') e.target.classList.remove('on'); });
 function connect(provider){
-  // Placeholder session until HashConnect / WalletConnect is wired to the backend.
+  if (window.ghostwireConnect) { window.ghostwireConnect(); return; }
   const account = '0.0.' + (48000 + Math.floor(Math.random()*900));
   localStorage.setItem('ghostwire.session', JSON.stringify({ provider, account, at: Date.now() }));
   window.location.href = 'app.html';
