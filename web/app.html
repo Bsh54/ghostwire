@@ -103,8 +103,8 @@ a{color:var(--info);text-decoration:none}
     <div class="net-pill"><span class="live"></span>Hedera Testnet</div>
     <div class="spacer"></div>
     <div class="balance">
-      <div class="label">Balance</div>
-      <div class="v mono" style="color:var(--value)">142.80 <span class="subtle">USDC</span></div>
+      <div class="label">Settled on-chain</div>
+      <div class="v mono" style="color:var(--value)" id="topSettled">0.000 <span class="subtle">ℏ</span></div>
     </div>
     <div class="acct">
       <div class="id" id="acctId">0.0.—</div>
@@ -173,43 +173,17 @@ a{color:var(--info);text-decoration:none}
 
     <section class="row row-3">
       <div class="card">
-        <div class="panel-head"><h3>My agents</h3><button class="btn btn-primary"><i data-lucide="play" style="width:16px;height:16px"></i>Run simulation</button></div>
-        <div class="agents">
-          <div class="agent-card">
-            <div class="top"><div class="agent-av">OR</div><div><div style="font-weight:600;font-size:14px">Orchestrator</div><span class="badge active">● active</span></div></div>
-            <div class="id"><i data-lucide="badge-check"></i>0.0.4821…a3f <i data-lucide="copy"></i></div>
-            <div class="trust"><i style="width:92%"></i></div><div class="label">Trust 92</div>
-          </div>
-          <div class="agent-card">
-            <div class="top"><div class="agent-av">SC</div><div><div style="font-weight:600;font-size:14px">Scraper</div><span class="badge active">● active</span></div></div>
-            <div class="id"><i data-lucide="badge-check"></i>0.0.4832…b71 <i data-lucide="copy"></i></div>
-            <div class="trust"><i style="width:78%"></i></div><div class="label">Trust 78</div>
-          </div>
-          <div class="agent-card">
-            <div class="top"><div class="agent-av">VF</div><div><div style="font-weight:600;font-size:14px">Verifier</div><span class="badge active">● active</span></div></div>
-            <div class="id"><i data-lucide="badge-check"></i>0.0.4840…c09 <i data-lucide="copy"></i></div>
-            <div class="trust"><i style="width:85%"></i></div><div class="label">Trust 85</div>
-          </div>
-        </div>
+        <div class="panel-head"><h3>Network agents</h3><span class="label" id="agentCount">—</span></div>
+        <div class="agents" id="agents"></div>
         <div style="margin-top:20px">
-          <div class="panel-head"><h3 style="font-size:15px">Spending guardrail — Orchestrator</h3></div>
-          <div class="bullet">
-            <div class="bl"><span class="muted">Spent <b class="mono" style="color:var(--fg)">6.80</b> / cap <b class="mono" style="color:var(--value)">10.00 USDC</b></span><span class="mono muted">68%</span></div>
-            <div class="bar"><i style="width:68%"></i><span class="cap" style="left:100%"></span></div>
-            <div class="label" style="margin-top:8px;color:var(--danger)"><i data-lucide="lock" style="width:12px;height:12px;display:inline"></i> 1 overspend attempt blocked on-chain</div>
-          </div>
+          <div class="panel-head"><h3 style="font-size:15px" id="guardTitle">Spending guardrail</h3></div>
+          <div class="bullet" id="guardrail"></div>
         </div>
       </div>
 
       <div class="card">
-        <div class="panel-head"><h3>Immutable receipts (HCS)</h3><a href="#">Topic ↗</a></div>
-        <div id="receipts">
-          <div class="rcpt"><span class="st" style="background:var(--success)"></span><span class="h">0x9f2a…7c1</span><span class="mono" style="color:var(--success)">+0.001</span><a href="#"><i data-lucide="external-link" style="width:14px;height:14px"></i></a></div>
-          <div class="rcpt"><span class="st" style="background:var(--success)"></span><span class="h">0x3b7e…9a4</span><span class="mono" style="color:var(--success)">+0.001</span><a href="#"><i data-lucide="external-link" style="width:14px;height:14px"></i></a></div>
-          <div class="rcpt"><span class="st" style="background:var(--danger)"></span><span class="h">refund · 0x1c…</span><span class="mono" style="color:var(--danger)">−0.001</span><a href="#"><i data-lucide="external-link" style="width:14px;height:14px"></i></a></div>
-          <div class="rcpt"><span class="st" style="background:var(--success)"></span><span class="h">0x8d5f…2e0</span><span class="mono" style="color:var(--success)">+0.005</span><a href="#"><i data-lucide="external-link" style="width:14px;height:14px"></i></a></div>
-          <div class="rcpt"><span class="st" style="background:var(--success)"></span><span class="h">0x6a1b…4f8</span><span class="mono" style="color:var(--success)">+0.001</span><a href="#"><i data-lucide="external-link" style="width:14px;height:14px"></i></a></div>
-        </div>
+        <div class="panel-head"><h3>Immutable receipts (HCS)</h3><a id="topicLink" href="#" target="_blank">Topic ↗</a></div>
+        <div id="receipts"></div>
       </div>
     </section>
   </main>
@@ -226,14 +200,30 @@ if(s){
 }
 function logout(){ localStorage.removeItem('ghostwire.session'); window.location.href='index.html'; }
 
-/* Live network graph */
+/* ---- Live state, fed entirely by the backend ---- */
+const NET='testnet';
+let AGENTS={}, ORDER=[], topicId=null;
+let vol=0, blockedCount=0, cntWindow=[];
+const kTx=document.getElementById('kTx'),kVol=document.getElementById('kVol'),kBud=document.getElementById('kBud');
+const feed=document.getElementById('feed');
+
+/* ---- Network graph (nodes built from real agents) ---- */
 const cv=document.getElementById('graph'),ctx=cv.getContext('2d');
 let W,H;function rz(){const d=devicePixelRatio||1;W=cv.clientWidth;H=420;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);}
 rz();addEventListener('resize',rz);
-const names=['OR','SC','VF','RD','DA','TR','LX','FQ','CV','MB'];
-const nodes=names.map((n,i)=>({name:n,mine:i===0,x:W/2+Math.cos(i/names.length*6.28)*(120+Math.random()*40),y:H/2+Math.sin(i/names.length*6.28)*(110+Math.random()*30),vx:0,vy:0}));
-const edges=[];for(let i=0;i<nodes.length;i++){edges.push([i,(i+1+(Math.random()*3|0))%nodes.length]);edges.push([i,(i+2)%nodes.length]);}
-let pulses=[],paused=false;
+let nodes=[],edges=[],idx={},pulses=[],paused=false;
+
+function buildGraph(symbols){
+  nodes=symbols.map((n,i)=>({name:n,x:W/2+Math.cos(i/symbols.length*6.28)*130,y:H/2+Math.sin(i/symbols.length*6.28)*110,vx:0,vy:0}));
+  idx=Object.fromEntries(nodes.map((n,i)=>[n.name,i]));
+  edges=[];for(let i=0;i<nodes.length;i++)edges.push([i,(i+1)%nodes.length]);
+}
+function pulseFor(from,to,blocked){
+  const i=idx[from],j=idx[to];if(i==null||j==null)return;
+  let e=edges.find(([a,b])=>(a===i&&b===j)||(a===j&&b===i));
+  if(!e){e=[i,j];edges.push(e);}
+  pulses.push({e:[...e],t:0,color:blocked?'#EF4444':'#22C55E'});
+}
 function step(){
   for(const a of nodes){for(const b of nodes){if(a===b)continue;let dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy)||1,r=1400/(d*d);a.vx+=dx/d*r;a.vy+=dy/d*r;}a.vx+=(W/2-a.x)*.0008;a.vy+=(H/2-a.y)*.0008;}
   for(const[i,j]of edges){const a=nodes[i],b=nodes[j];let dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,f=(d-150)*.002;a.vx+=dx/d*f;a.vy+=dy/d*f;b.vx-=dx/d*f;b.vy-=dy/d*f;}
@@ -241,40 +231,65 @@ function step(){
 }
 function draw(){
   ctx.clearRect(0,0,W,H);
-  for(const[i,j]of edges){const a=nodes[i],b=nodes[j];ctx.strokeStyle='rgba(51,65,85,0.5)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
-  for(const p of pulses){const a=nodes[p.e[0]],b=nodes[p.e[1]],x=a.x+(b.x-a.x)*p.t,y=a.y+(b.y-a.y)*p.t;ctx.strokeStyle=p.color;ctx.globalAlpha=.5;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.globalAlpha=1;ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=12;ctx.beginPath();ctx.arc(x,y,5,0,6.28);ctx.fill();ctx.shadowBlur=0;}
-  for(const a of nodes){ctx.fillStyle='#020617';ctx.beginPath();ctx.arc(a.x,a.y,17,0,6.28);ctx.fill();ctx.strokeStyle=a.mine?'#F59E0B':'#2DD4BF';ctx.lineWidth=a.mine?2.5:2;ctx.stroke();ctx.fillStyle=a.mine?'#F59E0B':'#2DD4BF';ctx.font='600 11px Inter';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(a.name,a.x,a.y);}
+  for(const[i,j]of edges){const a=nodes[i],b=nodes[j];if(!a||!b)continue;ctx.strokeStyle='rgba(51,65,85,0.5)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+  for(const p of pulses){const a=nodes[p.e[0]],b=nodes[p.e[1]];if(!a||!b)continue;const x=a.x+(b.x-a.x)*p.t,y=a.y+(b.y-a.y)*p.t;ctx.strokeStyle=p.color;ctx.globalAlpha=.5;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.globalAlpha=1;ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=12;ctx.beginPath();ctx.arc(x,y,5,0,6.28);ctx.fill();ctx.shadowBlur=0;}
+  for(const a of nodes){ctx.fillStyle='#020617';ctx.beginPath();ctx.arc(a.x,a.y,17,0,6.28);ctx.fill();ctx.strokeStyle='#2DD4BF';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#2DD4BF';ctx.font='600 11px Inter';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(a.name,a.x,a.y);}
 }
 function loop(){if(!paused){step();for(const p of pulses)p.t+=.02;pulses=pulses.filter(p=>p.t<1);}draw();requestAnimationFrame(loop);}
 loop();
 document.getElementById('pauseBtn').onclick=function(){paused=!paused;this.innerHTML=paused?'<i data-lucide="play" style="width:16px;height:16px"></i>Resume':'<i data-lucide="pause" style="width:16px;height:16px"></i>Pause';lucide.createIcons();};
 
-/* Live feed — real payment events over WebSocket */
-const feed=document.getElementById('feed');
-const kTx=document.getElementById('kTx'),kVol=document.getElementById('kVol'),kBud=document.getElementById('kBud');
-const idx=Object.fromEntries(nodes.map((n,i)=>[n.name,i]));
-let vol=0, cntWindow=[];
-
-function pulseFor(from,to,blocked){
-  const i=idx[from], j=idx[to];
-  if(i==null||j==null) return;
-  let e=edges.find(([a,b])=>(a===i&&b===j)||(a===j&&b===i));
-  if(!e){e=[i,j];edges.push(e);}
-  pulses.push({e:[...e],t:0,color:blocked?'#EF4444':'#22C55E'});
+/* ---- Render real agents, receipts, KPIs, guardrail ---- */
+function renderAgents(){
+  const box=document.getElementById('agents');
+  box.innerHTML=ORDER.map(sym=>{
+    const a=AGENTS[sym];const pct=Math.min(100,Math.round((a.spent/a.capHbar)*100));
+    return `<div class="agent-card">
+      <div class="top"><div class="agent-av">${a.symbol}</div><div><div style="font-weight:600;font-size:14px">${a.name}</div><span class="badge active">● active</span></div></div>
+      <div class="id"><i data-lucide="badge-check"></i>${a.accountId}</div>
+      <div class="trust"><i style="width:${a.trust}%"></i></div><div class="label">Trust ${a.trust} · spent ${a.spent.toFixed(3)}/${a.capHbar} ℏ (${pct}%)</div>
+    </div>`;}).join('');
+  document.getElementById('agentCount').textContent=ORDER.length+' on-chain';
+  lucide.createIcons();
+}
+function renderGuardrail(){
+  // Highlight the agent closest to its cap (the guardrail in action).
+  let top=null;for(const s of ORDER){const a=AGENTS[s];const r=a.spent/a.capHbar;if(!top||r>top.r)top={a,r};}
+  if(!top)return;const a=top.a,pct=Math.min(100,Math.round(top.r*100));
+  document.getElementById('guardTitle').textContent=`Spending guardrail — ${a.name}`;
+  document.getElementById('guardrail').innerHTML=`
+    <div class="bl"><span class="muted">Spent <b class="mono" style="color:var(--fg)">${a.spent.toFixed(3)}</b> / cap <b class="mono" style="color:var(--value)">${a.capHbar.toFixed(2)} ℏ</b></span><span class="mono muted">${pct}%</span></div>
+    <div class="bar"><i style="width:${pct}%;background:${pct>=100?'var(--danger)':'var(--success)'}"></i><span class="cap" style="left:100%"></span></div>
+    <div class="label" style="margin-top:8px;color:${blockedCount?'var(--danger)':'var(--fg-subtle)'}"><i data-lucide="lock" style="width:12px;height:12px;display:inline"></i> ${blockedCount} overspend attempt(s) blocked on-chain</div>`;
+  lucide.createIcons();
+}
+const receipts=document.getElementById('receipts');
+function addReceipt(ev){
+  if(ev.receiptSeq==null&&!ev.hashscan)return;
+  const row=document.createElement('div');row.className='rcpt';
+  row.innerHTML=`<span class="st" style="background:var(--success)"></span><span class="h">#${ev.receiptSeq??'—'} · ${ev.from}→${ev.to}</span><span class="mono" style="color:var(--success)">+${Number(ev.amount).toFixed(4)}</span><a href="${ev.hashscan||'#'}" target="_blank"><i data-lucide="external-link" style="width:14px;height:14px"></i></a>`;
+  receipts.prepend(row);while(receipts.children.length>8)receipts.lastChild.remove();
+  lucide.createIcons();
 }
 
-function renderEvent(ev){
+function applyEvent(ev,live){
   const ts=new Date(ev.ts||Date.now()).toTimeString().slice(0,8);
   if(ev.type==='payment'){
-    pulseFor(ev.from,ev.to,false);
-    vol+=Number(ev.amount)||0; kVol.textContent='$'+vol.toFixed(3);
+    if(live)pulseFor(ev.from,ev.to,false);
+    vol+=Number(ev.amount)||0;kVol.textContent=vol.toFixed(3)+' ℏ';
+    document.getElementById('topSettled').innerHTML=vol.toFixed(3)+' <span class="subtle">ℏ</span>';
+    if(AGENTS[ev.from])AGENTS[ev.from].spent+=Number(ev.amount)||0;
+    if(AGENTS[ev.to])AGENTS[ev.to].trust=Math.min(100,AGENTS[ev.to].trust+1);
     cntWindow.push(Date.now());
+    const vb=ev.verified?`<i data-lucide="badge-check" style="width:12px;height:12px;display:inline;color:var(--success)"></i>`:'';
     const link=ev.hashscan?` <a href="${ev.hashscan}" target="_blank" title="View on HashScan"><i data-lucide="external-link" style="width:12px;height:12px;display:inline"></i></a>`:'';
     const row=document.createElement('div');row.className='tx';
-    row.innerHTML=`<span class="st ok"></span><span class="flow"><b>${ev.from}</b> → <b>${ev.to}</b> <span class="subtle">${ev.serviceName||ev.service||''}</span>${link}</span><span class="amt pos mono">+${Number(ev.amount).toFixed(4)}</span><span class="ts">${ts}</span>`;
+    row.innerHTML=`<span class="st ok"></span><span class="flow"><b>${ev.from}</b> → <b>${ev.to}</b> <span class="subtle">${ev.serviceName||ev.service||''}</span> ${vb}${link}</span><span class="amt pos mono">+${Number(ev.amount).toFixed(4)}</span><span class="ts">${ts}</span>`;
     feed.prepend(row);
+    addReceipt(ev);
   } else if(ev.type==='blocked'){
-    pulseFor(ev.from,ev.to,true);
+    if(live)pulseFor(ev.from,ev.to,true);
+    blockedCount++;
     const row=document.createElement('div');row.className='tx';
     row.innerHTML=`<span class="st block"></span><span class="flow"><b>${ev.from}</b> → <b>${ev.to}</b> <span style="color:var(--danger)">blocked (cap)</span></span><span class="amt neg mono">—</span><span class="ts">${ts}</span>`;
     feed.prepend(row);
@@ -282,16 +297,27 @@ function renderEvent(ev){
   while(feed.children.length>40)feed.lastChild.remove();
   cntWindow=cntWindow.filter(t=>Date.now()-t<60000);
   kTx.textContent=cntWindow.length;
+  const used=Math.max(0,...ORDER.map(s=>AGENTS[s].spent/AGENTS[s].capHbar));
+  kBud.textContent=Math.min(100,Math.round(used*100))+'%';
+  renderGuardrail();
   lucide.createIcons();
+}
+
+function ingestSnapshot(d){
+  if(d.agents){AGENTS={};ORDER=[];for(const a of d.agents){AGENTS[a.symbol]={...a};ORDER.push(a.symbol);}buildGraph(ORDER);renderAgents();}
+  if(d.topicId){topicId=d.topicId;const l=document.getElementById('topicLink');l.href=`https://hashscan.io/${NET}/topic/${topicId}`;}
+  // Reset counters, replay recent history (not as live pulses).
+  vol=0;blockedCount=0;cntWindow=[];feed.innerHTML='';receipts.innerHTML='';
+  (d.recent||[]).forEach(ev=>applyEvent(ev,false));
+  renderGuardrail();
 }
 
 function connect(){
   const proto=location.protocol==='https:'?'wss':'ws';
   const ws=new WebSocket(`${proto}://${location.host}/ws`);
-  ws.onmessage=(m)=>{
-    const d=JSON.parse(m.data);
-    if(d.type==='snapshot'){ (d.recent||[]).forEach(renderEvent); }
-    else if(d.type==='event'){ renderEvent(d.event); }
+  ws.onmessage=(m)=>{const d=JSON.parse(m.data);
+    if(d.type==='snapshot')ingestSnapshot(d);
+    else if(d.type==='event')applyEvent(d.event,true);
   };
   ws.onclose=()=>setTimeout(connect,2000);
   ws.onerror=()=>ws.close();
