@@ -5,10 +5,14 @@
   "type": "module",
   "description": "Ghostwire backend — Hedera client, x402 marketplace and live feed",
   "scripts": {
-    "ping": "node scripts/ping.js"
+    "ping": "node scripts/ping.js",
+    "setup": "node scripts/setup.js",
+    "start": "node server.js"
   },
   "dependencies": {
     "@hashgraph/sdk": "^2.62.0",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "ws": "^8.18.0"
   }
 }

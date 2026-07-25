@@ -249,22 +249,54 @@ function loop(){if(!paused){step();for(const p of pulses)p.t+=.02;pulses=pulses.
 loop();
 document.getElementById('pauseBtn').onclick=function(){paused=!paused;this.innerHTML=paused?'<i data-lucide="play" style="width:16px;height:16px"></i>Resume':'<i data-lucide="pause" style="width:16px;height:16px"></i>Pause';lucide.createIcons();};
 
-/* Activity feed + KPIs */
-const feed=document.getElementById('feed'),amts=['0.001','0.001','0.0005','0.005','0.001','0.002'];
-let vol=3.412;const kTx=document.getElementById('kTx'),kVol=document.getElementById('kVol');
-function tick(){
-  if(paused)return;
-  const e=edges[Math.random()*edges.length|0],blocked=Math.random()<.12,color=blocked?'#EF4444':'#22C55E';
-  pulses.push({e:[...e],t:0,color});
-  const a=nodes[e[0]].name,b=nodes[e[1]].name,amt=amts[Math.random()*amts.length|0],ts=new Date().toTimeString().slice(0,8);
-  const row=document.createElement('div');row.className='tx';
-  row.innerHTML=blocked
-    ?`<span class="st block"></span><span class="flow"><b>${a}</b> → <b>${b}</b> <span style="color:var(--danger)">blocked (cap)</span></span><span class="amt neg mono">—</span><span class="ts">${ts}</span>`
-    :`<span class="st ok"></span><span class="flow"><b>${a}</b> → <b>${b}</b></span><span class="amt pos mono">+${amt}</span><span class="ts">${ts}</span>`;
-  feed.prepend(row);while(feed.children.length>40)feed.lastChild.remove();
-  kTx.textContent=40+(Math.random()*20|0);if(!blocked){vol+=parseFloat(amt);kVol.textContent='$'+vol.toFixed(3);}
+/* Live feed — real payment events over WebSocket */
+const feed=document.getElementById('feed');
+const kTx=document.getElementById('kTx'),kVol=document.getElementById('kVol'),kBud=document.getElementById('kBud');
+const idx=Object.fromEntries(nodes.map((n,i)=>[n.name,i]));
+let vol=0, cntWindow=[];
+
+function pulseFor(from,to,blocked){
+  const i=idx[from], j=idx[to];
+  if(i==null||j==null) return;
+  let e=edges.find(([a,b])=>(a===i&&b===j)||(a===j&&b===i));
+  if(!e){e=[i,j];edges.push(e);}
+  pulses.push({e:[...e],t:0,color:blocked?'#EF4444':'#22C55E'});
 }
-setInterval(tick,900);for(let i=0;i<8;i++)setTimeout(tick,i*120);
+
+function renderEvent(ev){
+  const ts=new Date(ev.ts||Date.now()).toTimeString().slice(0,8);
+  if(ev.type==='payment'){
+    pulseFor(ev.from,ev.to,false);
+    vol+=Number(ev.amount)||0; kVol.textContent='$'+vol.toFixed(3);
+    cntWindow.push(Date.now());
+    const link=ev.hashscan?` <a href="${ev.hashscan}" target="_blank" title="View on HashScan"><i data-lucide="external-link" style="width:12px;height:12px;display:inline"></i></a>`:'';
+    const row=document.createElement('div');row.className='tx';
+    row.innerHTML=`<span class="st ok"></span><span class="flow"><b>${ev.from}</b> → <b>${ev.to}</b> <span class="subtle">${ev.serviceName||ev.service||''}</span>${link}</span><span class="amt pos mono">+${Number(ev.amount).toFixed(4)}</span><span class="ts">${ts}</span>`;
+    feed.prepend(row);
+  } else if(ev.type==='blocked'){
+    pulseFor(ev.from,ev.to,true);
+    const row=document.createElement('div');row.className='tx';
+    row.innerHTML=`<span class="st block"></span><span class="flow"><b>${ev.from}</b> → <b>${ev.to}</b> <span style="color:var(--danger)">blocked (cap)</span></span><span class="amt neg mono">—</span><span class="ts">${ts}</span>`;
+    feed.prepend(row);
+  } else return;
+  while(feed.children.length>40)feed.lastChild.remove();
+  cntWindow=cntWindow.filter(t=>Date.now()-t<60000);
+  kTx.textContent=cntWindow.length;
+  lucide.createIcons();
+}
+
+function connect(){
+  const proto=location.protocol==='https:'?'wss':'ws';
+  const ws=new WebSocket(`${proto}://${location.host}/ws`);
+  ws.onmessage=(m)=>{
+    const d=JSON.parse(m.data);
+    if(d.type==='snapshot'){ (d.recent||[]).forEach(renderEvent); }
+    else if(d.type==='event'){ renderEvent(d.event); }
+  };
+  ws.onclose=()=>setTimeout(connect,2000);
+  ws.onerror=()=>ws.close();
+}
+connect();
 </script>
 </body>
 </html>

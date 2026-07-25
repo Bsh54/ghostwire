@@ -16,6 +16,9 @@ tunnel.json
 annnces.txt
 idees.txt
 
+# ---- Server-side generated secrets (agent keys, topic) ----
+server/data/
+
 # ---- Dependencies / build ----
 node_modules/
 dist/
