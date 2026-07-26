@@ -89,6 +89,14 @@ app.get("/api/service/:id", async (req, res) => {
   res.json({ service: svc.id, delivered: true, result: `Result of ${svc.name}`, settledAt: v.consensusAt });
 });
 
+// Clean URLs (no .html): /app serves the console, / serves the landing.
+app.get(["/app", "/console"], (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.sendFile(path.resolve(__dirname, "../web/app.html"));
+});
+app.get("/app.html", (_req, res) => res.redirect(301, "/app"));
+app.get("/index.html", (_req, res) => res.redirect(301, "/"));
+
 // --- static web app (never cache HTML so deploys show immediately) ---
 app.use(
   express.static(path.resolve(__dirname, "../web"), {

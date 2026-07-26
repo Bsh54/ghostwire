@@ -289,7 +289,7 @@ button{font-family:inherit}
 
 <script>
 const s = JSON.parse(localStorage.getItem('ghostwire.session') || 'null');
-if(!s){ location.replace('index.html'); }
+if(!s){ location.replace('/'); }
 lucide.createIcons();
 function shortAddr(a){ return a && a.startsWith('0x') && a.length>10 ? a.slice(0,6)+'…'+a.slice(-4) : a; }
 function shortAv(a){ return a ? (a.startsWith('0x') ? a.slice(2,4) : a.replace(/\D/g,'').slice(-2)).toUpperCase() : 'ME'; }
@@ -297,7 +297,7 @@ const AV_STYLE='adventurer';
 function avatar(name,accent){ const bg=(accent||'#1B2438').replace('#',''); return `https://api.dicebear.com/9.x/${AV_STYLE}/svg?seed=${encodeURIComponent(name||'agent')}&radius=25&backgroundColor=${bg}`; }
 const WIRE_AV=avatar('Wire the Commander','22C55E');
 if(s){ const av=document.getElementById('acctAv'); av.innerHTML=`<img src="${avatar(s.account,'F59E0B')}" alt="">`; av.title=s.account; }
-function logout(){ localStorage.removeItem('ghostwire.session'); location.href='index.html'; }
+function logout(){ localStorage.removeItem('ghostwire.session'); location.href='/'; }
 
 const ICONS={token_detective:'scan-search',defi_pulse:'gauge',wallet_profiler:'user-search',dex_quote:'arrow-left-right',deep_researcher:'telescope',whale_watcher:'waves'};
 const META={};

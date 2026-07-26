@@ -240,7 +240,7 @@ async function connectW(i){const eth=wallets[i]?.provider;if(!eth)return;
     try{await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:HEDERA.chainId}]});}
     catch(err){if((err.code||err?.data?.originalError?.code)===4902)await eth.request({method:'wallet_addEthereumChain',params:[HEDERA]});}
     localStorage.setItem('ghostwire.session',JSON.stringify({provider:wallets[i].info.name,account:acc[0],at:Date.now()}));
-    location.href='app.html';
+    location.href='/app';
   }catch(_){}}
 </script>
 </body>
