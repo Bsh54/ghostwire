@@ -1,6 +1,16 @@
 // The real work each agent does (served only by the independent agents
 // service). Each uses live external data or on-chain data — nothing the base
 // model could produce on its own.
+import { Client, AccountId, PrivateKey } from "@hashgraph/sdk";
+import { NETWORK } from "./hedera.js";
+import { hire } from "./hire.js";
+import { ask } from "./llm.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const roster = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../data/agents.json"), "utf8"));
 
 const TESTNET_MIRROR = "https://testnet.mirrornode.hedera.com";
 const MAINNET_MIRROR = "https://mainnet-public.mirrornode.hedera.com";
@@ -8,7 +18,45 @@ const CG = { hbar:"hedera-hashgraph", btc:"bitcoin", eth:"ethereum", sol:"solana
 
 const j = async (url, opts) => (await fetch(url, opts)).json();
 
+// A signing client for the Strategist so it can pay the agents it sub-contracts.
+const strat = roster.find((a) => a.symbol === "AN");
+let stratClient = null;
+if (strat) {
+  stratClient = NETWORK === "mainnet" ? Client.forMainnet() : Client.forTestnet();
+  stratClient.setOperator(AccountId.fromString(strat.accountId), PrivateKey.fromStringECDSA(strat.privateKey));
+}
+
 export const CAPS = {
+  // Strategist: sub-contracts and PAYS several agents (a real agent-to-agent
+  // payment cascade), then synthesizes a premium read. This is why it costs more.
+  analyst: async (a) => {
+    const subject = String(a.subject || "").trim() || "HBAR";
+    if (!stratClient) return "(strategist account not configured)";
+    const buyer = { client: stratClient, accountId: strat.accountId };
+    const facts = [];
+    const chain = [];
+    const sub = async (label, agentPath, args) => {
+      try {
+        const out = await hire(agentPath, args, buyer);
+        facts.push(`${label}: ${out.result}`);
+        chain.push(`- ${label}: paid ${out.amount} ℏ — ${out.hashscan}`);
+      } catch (e) { facts.push(`${label}: unavailable`); }
+    };
+    // Sub-contract three specialists (each is a real on-chain payment from this agent).
+    await sub("Price", "ticker", { symbol: subject });
+    await sub("Token scan", "token-detective", { query: subject });
+    await sub("Market sentiment", "defi-pulse", {});
+
+    let analysis = "";
+    try {
+      analysis = await ask(
+        "You are a market strategist. Using ONLY the data below, write a concise, balanced 2-3 sentence read on the subject. Professional tone, no emojis. This is not financial advice.",
+        `Subject: ${subject}\n\n${facts.join("\n")}`,
+      );
+    } catch (_) { analysis = facts.join("\n"); }
+    return `${analysis}\n\nAgents I hired and paid on-chain for this:\n${chain.join("\n") || "(none available)"}`;
+  },
+
   // Token risk & market scan via DexScreener.
   token_detective: async (a) => {
     const q = encodeURIComponent(String(a.query || "").trim());

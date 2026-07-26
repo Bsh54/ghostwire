@@ -300,7 +300,7 @@ const WIRE_AV=avatar('Wire the Commander','22C55E');
 if(s){ const av=document.getElementById('acctAv'); av.innerHTML=`<img src="${avatar(s.account,'F59E0B')}" alt="">`; av.title='Your wallet (identity) · '+s.account; }
 function logout(){ localStorage.removeItem('ghostwire.session'); location.href='/'; }
 
-const ICONS={token_detective:'scan-search',defi_pulse:'gauge',wallet_profiler:'user-search',dex_quote:'arrow-left-right',deep_researcher:'telescope',whale_watcher:'waves'};
+const ICONS={analyst:'brain',token_detective:'scan-search',defi_pulse:'gauge',wallet_profiler:'user-search',dex_quote:'arrow-left-right',deep_researcher:'telescope',whale_watcher:'waves'};
 const META={};
 const msgs=document.getElementById('msgs'), convsEl=document.getElementById('convs'), spend=document.getElementById('spend');
 const inp=document.getElementById('inp'), sendBtn=document.getElementById('sendBtn');
@@ -402,8 +402,8 @@ function newChat(){ showChat(); currentConv=null; msgs.innerHTML=''; clearSpend(
 function showWelcome(){
   msgs.innerHTML=`<div class="welcome">
     <div class="hi"><img src="${WIRE_AV}" alt="Wire"></div>
-    <h1>Hey, I'm Wire.</h1>
-    <p>Give me a task — I'll hire and pay the services I need, for real, on Hedera.</p>
+    <h1>Wire</h1>
+    <p>Ask a question or set a task. I hire and pay the right specialist agents on Hedera to get you real answers.</p>
     <div class="cards">
       <div class="qc" onclick="quick('Scan the token SAUCE — is it safe?')"><div class="qt"><i data-lucide="scan-search"></i>Token scan</div><div class="qd">Eagleton checks liquidity, volume &amp; red flags</div></div>
       <div class="qc" onclick="quick('What is the crypto market sentiment right now?')"><div class="qt"><i data-lucide="gauge"></i>Market pulse</div><div class="qd">Luna reads Fear &amp; Greed + trending</div></div>

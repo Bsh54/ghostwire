@@ -10,6 +10,14 @@ const agents = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../data/agent
 const acct = (sym) => (agents.find((a) => a.symbol === sym) || {}).accountId;
 
 export const AGENTS = {
+  analyst: {
+    path: "analyst", account: acct("AN"), price: 0.10,
+    persona: { name: "Vesper Nightsong", role: "Strategist", icon: "brain", accent: "#F97316",
+      blurb: "Commissions and pays several agents, then synthesizes a premium read." },
+    def: { type: "function", function: {
+      name: "analyst", description: "Premium deep analysis of a token or subject: it hires and pays several data agents, then synthesizes the findings.",
+      parameters: { type: "object", properties: { subject: { type: "string", description: "Token or subject, e.g. HBAR" } }, required: ["subject"] } } },
+  },
   token_detective: {
     path: "token-detective", account: acct("SC"), price: 0.03,
     persona: { name: "Eagleton Skywatcher", role: "Navigator", icon: "scan-search", accent: "#2DD4BF",
