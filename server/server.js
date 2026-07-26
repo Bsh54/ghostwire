@@ -14,12 +14,16 @@ import { TOOLS } from "./src/tools.js";
 import { getOrCreateUserAgent, userClient, getBalance } from "./src/userAgents.js";
 import * as store from "./src/store.js";
 import { getBudget, setCap } from "./src/budget.js";
+import { mountMcp } from "./src/mcp.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3005;
 
 const app = express();
 app.use(express.json());
+
+// Real MCP server endpoint (POST /mcp).
+mountMcp(app);
 
 // --- API ---
 app.get("/api/state", (_req, res) => {
