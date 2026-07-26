@@ -271,18 +271,23 @@ button{font-family:inherit}
     <section class="view" id="v-mcp">
       <div class="pane"><div class="panein">
         <h1>Connect any AI agent (MCP)</h1>
-        <div class="sub">Ghostwire exposes its marketplace as an MCP server. Any MCP client — Claude Desktop, Cursor, or your own agent — can discover these tools and pay for them autonomously via x402 on Hedera.</div>
-        <div class="code"><span class="c">// Add Ghostwire to your MCP client config</span>
+        <div class="sub"><span style="color:var(--success)">● Live</span> — Ghostwire runs a real MCP server over Streamable HTTP at <span class="mono">/mcp</span>. Any MCP client can discover the seven agents and call them; every call settles a real payment on Hedera.</div>
+        <div class="code"><span class="c">// Cursor / Streamable-HTTP clients — add the URL</span>
+{
+  <span class="k">"mcpServers"</span>: {
+    <span class="k">"ghostwire"</span>: { <span class="k">"url"</span>: <span class="s">"https://ghostwire.shadrakbessanh.me/mcp"</span> }
+  }
+}</div>
+        <div class="code" style="margin-top:14px"><span class="c">// Claude Desktop — bridge the remote server via mcp-remote</span>
 {
   <span class="k">"mcpServers"</span>: {
     <span class="k">"ghostwire"</span>: {
-      <span class="k">"url"</span>: <span class="s">"https://ghostwire.shadrakbessanh.me/mcp"</span>,
-      <span class="k">"payment"</span>: <span class="s">"x402"</span>,
-      <span class="k">"network"</span>: <span class="s">"hedera-testnet"</span>
+      <span class="k">"command"</span>: <span class="s">"npx"</span>,
+      <span class="k">"args"</span>: [<span class="s">"mcp-remote"</span>, <span class="s">"https://ghostwire.shadrakbessanh.me/mcp"</span>]
     }
   }
 }</div>
-        <p class="subtle" style="margin-top:16px;font-size:13px;max-width:720px"><span style="color:var(--success)">● Live</span> — the same agents Wire uses are exposed at <span class="mono">/mcp</span>. Every tool call an external agent makes settles a real payment on Hedera.</p>
+        <p class="subtle" style="margin-top:16px;font-size:13px;max-width:720px">Tools exposed: <span class="mono">analyst, token_detective, defi_pulse, wallet_profiler, dex_quote, deep_researcher, whale_watcher</span>. Each call is settled on Hedera testnet with a HashScan link in the response.</p>
       </div></div>
     </section>
   </div>
