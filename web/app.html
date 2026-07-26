@@ -94,6 +94,13 @@ button{font-family:inherit}
 .msg .content ul{margin:4px 0 8px;padding-left:20px}.msg .content li{margin:2px 0}
 .msg .content code{font-family:var(--font-mono);font-size:13px;background:var(--surface-3);padding:1px 5px;border-radius:4px}
 .msg .content strong{font-weight:600;color:#fff}
+.msg .content em{font-style:italic}
+.msg .content h3{font-size:16px;font-weight:700;margin:14px 0 6px}
+.msg .content h4{font-size:14px;font-weight:600;margin:11px 0 5px;color:var(--fg-muted)}
+.msg .content table{border-collapse:collapse;margin:10px 0;font-size:13px;display:block;overflow-x:auto;max-width:100%}
+.msg .content th,.msg .content td{border:1px solid var(--border-2);padding:6px 11px;text-align:left;white-space:nowrap}
+.msg .content th{background:var(--surface-3);font-weight:600;color:var(--fg)}
+.msg .content tr:nth-child(even) td{background:rgba(255,255,255,.02)}
 .think{display:inline-flex;align-items:center;gap:8px;color:var(--fg-muted);font-size:13px}
 .dots{display:inline-flex;gap:3px}.dots i{width:5px;height:5px;border-radius:50%;background:var(--agent);animation:blink 1.2s infinite}
 .dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
@@ -265,16 +272,33 @@ document.querySelectorAll('.frow[data-v]').forEach(n=>n.onclick=()=>{
 function showChat(){ document.querySelectorAll('.frow[data-v]').forEach(x=>x.classList.remove('active')); document.querySelectorAll('.view').forEach(v=>v.classList.remove('on')); document.getElementById('v-chat').classList.add('on'); document.getElementById('tbarTitle').textContent='Wire · Assistant'; }
 
 /* ---- markdown (safe, minimal) ---- */
-function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function esc(t){return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function inline(t){return t.replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\*([^*\n]+)\*/g,'<em>$1</em>');}
+function cells(l){return l.trim().replace(/^\||\|$/g,'').split('|').map(c=>c.trim());}
 function md(t){
-  t=esc(t||'');
-  t=t.replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
-  const lines=t.split('\n'); let html='',inList=false;
-  for(let l of lines){
-    if(/^\s*[-*]\s+/.test(l)){ if(!inList){html+='<ul>';inList=true;} html+='<li>'+l.replace(/^\s*[-*]\s+/,'')+'</li>'; }
-    else { if(inList){html+='</ul>';inList=false;} if(l.trim())html+='<p>'+l+'</p>'; }
+  const lines=esc(t||'').split('\n'); let html='', i=0;
+  while(i<lines.length){
+    const l=lines[i];
+    // table
+    if(/^\s*\|.*\|\s*$/.test(l) && i+1<lines.length && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i+1])){
+      const head=cells(l); i+=2; const rows=[];
+      while(i<lines.length && /^\s*\|.*\|\s*$/.test(lines[i])){ rows.push(cells(lines[i])); i++; }
+      html+='<table><thead><tr>'+head.map(h=>'<th>'+inline(h)+'</th>').join('')+'</tr></thead><tbody>'+
+        rows.map(r=>'<tr>'+r.map(c=>'<td>'+inline(c)+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
+      continue;
+    }
+    // heading
+    const hm=l.match(/^(#{1,6})\s+(.*)$/);
+    if(hm){ const tag=hm[1].length<=2?'h3':'h4'; html+='<'+tag+'>'+inline(hm[2])+'</'+tag+'>'; i++; continue; }
+    // list
+    if(/^\s*[-*]\s+/.test(l)){ const items=[];
+      while(i<lines.length && /^\s*[-*]\s+/.test(lines[i])){ items.push(inline(lines[i].replace(/^\s*[-*]\s+/,''))); i++; }
+      html+='<ul>'+items.map(x=>'<li>'+x+'</li>').join('')+'</ul>'; continue;
+    }
+    // paragraph
+    if(l.trim()) html+='<p>'+inline(l)+'</p>';
+    i++;
   }
-  if(inList)html+='</ul>';
   return html||'<p></p>';
 }
 function fmtTime(ts){const d=(Date.now()-ts)/1000;if(d<60)return 'now';if(d<3600)return Math.floor(d/60)+'m';if(d<86400)return Math.floor(d/3600)+'h';return Math.floor(d/86400)+'d';}
@@ -304,7 +328,7 @@ async function openConv(id){
       else addBot(m.content, m.steps||[]);
     });
   }catch(_){}
-  scroll();
+  scrollForce();
 }
 async function delConv(e,id){
   e.stopPropagation();
@@ -357,7 +381,10 @@ function paidHtml(step){
   if(step.status==='error') return `<span class="err"><i data-lucide="shield-x" style="width:13px;height:13px"></i>${step.message||'payment error'}</span>`;
   return `<span class="ok"><i data-lucide="check-circle" style="width:14px;height:14px"></i>Paid ${step.price} ℏ</span>${step.hashscan?`<a href="${step.hashscan}" target="_blank">HashScan <i data-lucide="external-link" style="width:12px;height:12px"></i></a>`:''}`;
 }
-function scroll(){msgs.scrollTop=msgs.scrollHeight;}
+let stick=true;
+msgs.addEventListener('scroll',()=>{ stick = (msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight) < 140; });
+function scroll(){ if(stick) msgs.scrollTop=msgs.scrollHeight; }
+function scrollForce(){ stick=true; msgs.scrollTop=msgs.scrollHeight; }
 function addSpend(tool,amt,link){
   if(spend.querySelector('.emptyr'))spend.innerHTML='';
   const d=document.createElement('div');d.className='sp';
@@ -410,6 +437,7 @@ function send(){
   inp.value='';autg(inp);busy=true;sendBtn.disabled=true;inp.disabled=true;
   addUser(v);
   curBubble=addBot('',[]); setPlan(`<span class="dots"><i></i><i></i><i></i></span> thinking…`);
+  scrollForce();
   ws.send(JSON.stringify({type:'chat',text:v,user:s.account,conversationId:currentConv}));
 }
 
