@@ -258,11 +258,6 @@ footer .wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
     <h3>Connect a wallet</h3>
     <p>Connect any EVM wallet to Hedera Testnet — your address is your identity. No passwords, no sign-up.</p>
     <div id="walletList"></div>
-    <div class="wallet-opt" onclick="connectDemo()">
-      <div class="wic">GW</div>
-      <div><div class="wn">Continue without a wallet</div><div class="wd">Demo mode — explore the platform</div></div>
-      <i data-lucide="chevron-right" class="arw"></i>
-    </div>
     <div class="note">Testnet only — no real funds are used.</div>
   </div>
 </div>
@@ -318,11 +313,6 @@ async function connectWallet(i){
     localStorage.setItem('ghostwire.session', JSON.stringify({ provider: wallets[i].info.name, account, at: Date.now() }));
     location.href = 'app.html';
   }catch(e){ /* user rejected */ }
-}
-function connectDemo(){
-  const account = '0.0.' + (48000 + Math.floor(Math.random()*900));
-  localStorage.setItem('ghostwire.session', JSON.stringify({ provider:'demo', account, at: Date.now() }));
-  location.href = 'app.html';
 }
 
 /* Hero network animation */
