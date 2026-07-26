@@ -28,7 +28,8 @@ button{font-family:inherit}
 /* ===== Facebook-style top nav ===== */
 .topnav{height:60px;flex-shrink:0;display:flex;align-items:center;gap:14px;padding:0 18px;background:var(--surface);border-bottom:1px solid var(--border)}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;min-width:160px}
-.mark{width:30px;height:30px;border-radius:9px;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:0 0 18px -4px var(--agent)}
+.mark{width:32px;height:32px;border-radius:50%;overflow:hidden;box-shadow:0 0 16px -5px var(--success);flex-shrink:0}
+.mark img{width:100%;height:100%;object-fit:cover;display:block}
 .mark svg{width:17px;height:17px;color:#04120E}
 .tabs{flex:1;display:flex;justify-content:center;gap:6px}
 .tab{position:relative;height:46px;padding:0 18px;border-radius:10px;border:none;background:none;color:var(--fg-muted);cursor:pointer;display:flex;align-items:center;gap:9px;font-size:14px;font-weight:600;transition:140ms}
@@ -208,7 +209,7 @@ button{font-family:inherit}
 <div class="shell">
   <!-- Facebook-style top nav -->
   <header class="topnav">
-    <div class="brand"><div class="mark"><i data-lucide="zap"></i></div><span>Ghostwire</span></div>
+    <div class="brand"><div class="mark"><img src="/logo.png" alt="Ghostwire"></div><span>Ghostwire</span></div>
     <nav class="tabs">
       <button class="tab active" data-v="chat"><i data-lucide="message-square"></i><span>Assistant</span></button>
       <button class="tab" data-v="market"><i data-lucide="store"></i><span>Marketplace</span></button>
@@ -296,7 +297,7 @@ function shortAv(a){ return a ? (a.startsWith('0x') ? a.slice(2,4) : a.replace(/
 const AV_STYLE='adventurer';
 function avatar(name,accent){ const bg=(accent||'#1B2438').replace('#',''); return `https://api.dicebear.com/9.x/${AV_STYLE}/svg?seed=${encodeURIComponent(name||'agent')}&radius=25&backgroundColor=${bg}`; }
 const WIRE_AV=avatar('Wire the Commander','22C55E');
-if(s){ const av=document.getElementById('acctAv'); av.innerHTML=`<img src="${avatar(s.account,'F59E0B')}" alt="">`; av.title=s.account; }
+if(s){ const av=document.getElementById('acctAv'); av.innerHTML=`<img src="${avatar(s.account,'F59E0B')}" alt="">`; av.title='Your wallet (identity) · '+s.account; }
 function logout(){ localStorage.removeItem('ghostwire.session'); location.href='/'; }
 
 const ICONS={token_detective:'scan-search',defi_pulse:'gauge',wallet_profiler:'user-search',dex_quote:'arrow-left-right',deep_researcher:'telescope',whale_watcher:'waves'};
@@ -311,6 +312,9 @@ async function refreshAgent(){
     if(typeof a.spent==='number')spent=a.spent;
     const bal=document.getElementById('agBal');
     if(bal){ if(a.balance!=null) bal.textContent=a.balance.toFixed(3)+' ℏ'; bal.href='https://hashscan.io/testnet/account/'+a.accountId; }
+    // Top pill = the agent account that PAYS (id + live balance).
+    const pill=document.getElementById('agentPill');
+    if(pill && a.accountId){ document.getElementById('agentId').textContent=' '+shortAddr(a.accountId)+(a.balance!=null?' · '+a.balance.toFixed(2)+' ℏ':''); pill.href='https://hashscan.io/testnet/account/'+a.accountId; pill.title='Your agent — this account pays for services'; pill.style.display='inline-flex'; }
     updateBudUI();
   }catch(_){}
 }
@@ -375,20 +379,24 @@ async function loadConvs(){
 async function openConv(id){
   showChat(); currentConv=id;
   document.querySelectorAll('.conv').forEach(c=>c.classList.toggle('active',c.dataset.id===id));
-  msgs.innerHTML='';
+  msgs.innerHTML=''; clearSpend();
   try{
     const c = await (await fetch('/api/conversation/'+id)).json();
-    (c.messages||[]).forEach(m=>{ m.role==='user'?addUser(m.content):addBot(m.content,m.steps||[]); });
+    (c.messages||[]).forEach(m=>{
+      if(m.role==='user'){ addUser(m.content); }
+      else { addBot(m.content, m.steps||[]); (m.steps||[]).forEach(st=>{ if(st.status==='paid') spendRow(st.tool, Number(st.price).toFixed(4), st.hashscan); }); }
+    });
   }catch(_){}
   scrollForce();
 }
+function clearSpend(){ spend.innerHTML='<div class="emptyr">Payments Wire makes appear here, with HashScan proof.</div>'; }
 async function delConv(e,id){
   e.stopPropagation();
   await fetch('/api/conversation/'+id,{method:'DELETE'});
   if(currentConv===id){ currentConv=null; msgs.innerHTML=''; showWelcome(); }
   loadConvs();
 }
-function newChat(){ showChat(); currentConv=null; msgs.innerHTML=''; showWelcome(); document.querySelectorAll('.conv').forEach(c=>c.classList.remove('active')); inp.focus(); }
+function newChat(){ showChat(); currentConv=null; msgs.innerHTML=''; clearSpend(); showWelcome(); document.querySelectorAll('.conv').forEach(c=>c.classList.remove('active')); inp.focus(); }
 
 /* rendering */
 function showWelcome(){
@@ -438,12 +446,15 @@ function syncBtn(){ if(toBottom) toBottom.style.display = stick ? 'none' : 'flex
 msgs.addEventListener('scroll',()=>{ stick=atBottom(); syncBtn(); });
 function scroll(){ if(stick){ msgs.scrollTop=msgs.scrollHeight; } syncBtn(); }
 function scrollForce(){ stick=true; msgs.scrollTop=msgs.scrollHeight; syncBtn(); lucide.createIcons(); }
-function addSpend(tool,amt,link){
+function spendRow(tool,amt,link){
   if(spend.querySelector('.emptyr'))spend.innerHTML='';
   const p=(META[tool]||{}).persona||{};
   const d=document.createElement('div');d.className='sp';
-  d.innerHTML=`<img class="spav" src="${avatar(p.name||tool,p.accent)}" alt=""><span class="f"><b>${p.name||tool.replace('_',' ')}</b></span><a class="a" href="${link}" target="_blank">+${amt}</a>`;
+  d.innerHTML=`<img class="spav" src="${avatar(p.name||tool,p.accent)}" alt=""><span class="f"><b>${p.name||tool.replace('_',' ')}</b></span><a class="a" href="${link||'#'}" target="_blank">+${amt}</a>`;
   spend.prepend(d);
+}
+function addSpend(tool,amt,link){
+  spendRow(tool,amt,link);
   spent+=parseFloat(amt); updateBudUI(); refreshAgent();
 }
 

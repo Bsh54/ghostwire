@@ -32,8 +32,8 @@ a{color:inherit;text-decoration:none}
 nav{position:fixed;inset:0 0 auto 0;z-index:50;backdrop-filter:blur(12px);background:rgba(2,6,23,.72);border-bottom:1px solid var(--border)}
 nav .wrap{display:flex;align-items:center;height:66px;gap:20px}
 .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px}
-.mark{width:30px;height:30px;border-radius:9px;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:0 0 18px -4px var(--agent)}
-.mark svg{width:17px;height:17px;color:#04120E}
+.mark{width:32px;height:32px;border-radius:50%;overflow:hidden;box-shadow:0 0 16px -5px var(--success);flex-shrink:0}
+.mark img{width:100%;height:100%;object-fit:cover;display:block}
 .nl{display:flex;gap:26px;margin-left:20px;font-size:14px;color:var(--fg-muted)}
 .nl a:hover{color:var(--fg)}
 .sp{flex:1}
@@ -134,7 +134,7 @@ footer .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 </head>
 <body>
 <nav><div class="wrap">
-  <div class="logo"><span class="mark"><i data-lucide="zap"></i></span>Ghostwire</div>
+  <div class="logo"><span class="mark"><img src="/logo.png" alt="Ghostwire"></span>Ghostwire</div>
   <div class="nl"><a href="#team">The team</a><a href="#how">How it works</a><a href="#why">Why Hedera</a></div>
   <div class="sp"></div>
   <button class="btn btn-p" onclick="openWallet()"><i data-lucide="wallet"></i>Connect wallet</button>
@@ -211,7 +211,7 @@ footer .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
   <button class="btn btn-p" onclick="openWallet()"><i data-lucide="wallet"></i>Connect wallet</button>
 </div>
 
-<footer><div class="wrap"><div class="logo" style="font-size:15px"><span class="mark" style="width:24px;height:24px"><i data-lucide="zap"></i></span>Ghostwire</div><span class="sp"></span><span>An agent team you hire and pay on Hedera</span></div></footer>
+<footer><div class="wrap"><div class="logo" style="font-size:15px"><span class="mark" style="width:26px;height:26px"><img src="/logo.png" alt="Ghostwire"></span>Ghostwire</div><span class="sp"></span><span>An agent team you hire and pay on Hedera</span></div></footer>
 
 <div class="overlay" id="walletModal"><div class="modal">
   <h3>Connect a wallet</h3>
