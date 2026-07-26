@@ -12,6 +12,7 @@ import { agentList, topic } from "./src/agents.js";
 import { runChat } from "./src/chat.js";
 import { TOOLS } from "./src/tools.js";
 import { getOrCreateUserAgent, userClient } from "./src/userAgents.js";
+import * as store from "./src/store.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3005;
@@ -23,6 +24,15 @@ app.use(express.json());
 app.get("/api/state", (_req, res) => {
   res.json({ agents: agentList(), services: SERVICES, topicId: topic(), recent: recentEvents() });
 });
+
+// Conversations (server-stored chat history, per user).
+app.get("/api/conversations", (req, res) => res.json(store.list(req.query.user)));
+app.get("/api/conversation/:id", (req, res) => {
+  const c = store.get(req.params.id);
+  if (!c) return res.status(404).json({ error: "not found" });
+  res.json(c);
+});
+app.delete("/api/conversation/:id", (req, res) => { store.remove(req.params.id); res.json({ ok: true }); });
 
 // The real paid tools the assistant can hire (for the marketplace UI).
 app.get("/api/tools", (_req, res) => {
@@ -83,11 +93,16 @@ wss.on("connection", (ws) => {
     if (data.type === "chat" && typeof data.text === "string") {
       const emit = (evt) => { if (ws.readyState === 1) ws.send(JSON.stringify(evt)); };
       try {
+        const text = data.text.slice(0, 2000);
+        const conv = store.getOrCreate(data.conversationId, data.user, text);
+        emit({ type: "conversation", id: conv.id, title: conv.title });
         emit({ type: "agent-preparing" });
         const record = await getOrCreateUserAgent(data.user);
         const client = userClient(record);
         emit({ type: "agent-info", accountId: record.accountId, created: record.created });
-        await runChat(data.text.slice(0, 2000), emit, { client, accountId: record.accountId });
+        const history = conv.messages.slice(-10);
+        const result = await runChat(text, emit, { client, accountId: record.accountId }, history);
+        store.appendTurn(conv.id, { role: "user", content: text }, { role: "assistant", content: result.content, steps: result.steps });
       } catch (e) {
         emit({ type: "chat-error", message: String(e.message || e) });
       }

@@ -3,169 +3,226 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ghostwire — Console</title>
+<title>Ghostwire — Wire</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
 :root{
-  --bg:#020617;--surface:#0E1223;--surface-2:#161B2E;--border:#1E2A44;--border-strong:#334155;
-  --fg:#F8FAFC;--fg-muted:#94A3B8;--fg-subtle:#64748B;
-  --success:#22C55E;--value:#F59E0B;--agent:#2DD4BF;--info:#38BDF8;--pending:#FBBF24;--danger:#EF4444;
-  --font-sans:'Inter',system-ui,sans-serif;--font-mono:'JetBrains Mono',monospace;--radius:8px;
+  --bg:#020617;--surface:#0B1020;--surface-2:#141B2E;--surface-3:#1B2438;--border:#1E2A44;--border-2:#2A3654;
+  --fg:#F1F5F9;--fg-muted:#94A3B8;--fg-subtle:#64748B;
+  --success:#22C55E;--value:#F59E0B;--agent:#2DD4BF;--info:#38BDF8;--danger:#EF4444;
+  --grad:linear-gradient(135deg,#2DD4BF,#22C55E);
+  --font-sans:'Inter',system-ui,sans-serif;--font-mono:'JetBrains Mono',monospace;
   --ease:cubic-bezier(.16,1,.3,1);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
 .mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
 .muted{color:var(--fg-muted)}.subtle{color:var(--fg-subtle)}
 a{color:var(--info);text-decoration:none}
-.label{font-size:11px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;color:var(--fg-muted)}
-.app{display:grid;grid-template-columns:220px 1fr;grid-template-rows:58px 1fr;height:100vh}
-.topbar{grid-column:1/3;display:flex;align-items:center;gap:14px;padding:0 20px;border-bottom:1px solid var(--border);background:var(--surface)}
-.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:17px}
-.logo .dot{width:10px;height:10px;border-radius:3px;background:var(--success);box-shadow:0 0 10px var(--success)}
-.pill{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:4px 10px;border:1px solid var(--agent);border-radius:6px;color:var(--agent)}
-.pill .live{width:7px;height:7px;border-radius:50%;background:var(--agent);animation:pulse 1.6s infinite}
+button{font-family:inherit}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:8px}::-webkit-scrollbar-track{background:transparent}
+
+.app{display:grid;grid-template-columns:264px 1fr;height:100dvh}
+
+/* Sidebar */
+.side{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
+.brand{display:flex;align-items:center;gap:10px;padding:16px 16px 12px;font-weight:700;font-size:17px}
+.mark{width:28px;height:28px;border-radius:8px;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:0 0 18px -4px var(--agent)}
+.mark svg{width:16px;height:16px;color:#04120E}
+.newbtn{margin:4px 12px 12px;height:42px;border-radius:10px;border:1px solid var(--border-2);background:var(--surface-2);color:var(--fg);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:150ms}
+.newbtn:hover{background:var(--surface-3);border-color:var(--agent)}
+.newbtn svg{width:16px;height:16px}
+.side .lbl{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--fg-subtle);padding:6px 18px}
+.convs{flex:1;overflow-y:auto;padding:0 8px}
+.conv{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;color:var(--fg-muted);font-size:13.5px;transition:120ms;position:relative}
+.conv:hover{background:var(--surface-2);color:var(--fg)}
+.conv.active{background:var(--surface-2);color:var(--fg)}
+.conv svg.ci{width:15px;height:15px;flex-shrink:0;color:var(--fg-subtle)}
+.conv .tt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.conv .del{opacity:0;color:var(--fg-subtle);width:26px;height:26px;border:none;background:none;cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.conv:hover .del{opacity:1}.conv .del:hover{background:var(--surface-3);color:var(--danger)}
+.conv .del svg{width:14px;height:14px}
+.side .foot{border-top:1px solid var(--border);padding:8px}
+.frow{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;color:var(--fg-muted);font-size:13.5px;font-weight:500;cursor:pointer;transition:120ms}
+.frow:hover{background:var(--surface-2);color:var(--fg)}.frow svg{width:16px;height:16px}
+.frow.active{color:var(--fg)}.frow.active svg{color:var(--agent)}
+
+/* Main */
+.main{min-width:0;display:flex;flex-direction:column;height:100dvh}
+.tbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 20px;flex-shrink:0}
+.tbar h2{font-size:15px;font-weight:600}
 .spacer{flex:1}
-.acct{display:flex;align-items:center;gap:9px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:5px 10px;border-radius:7px;border:1px solid var(--border-2)}
+.chip.net{color:var(--agent);border-color:var(--agent)}
+.chip.net .live{width:6px;height:6px;border-radius:50%;background:var(--agent);animation:pulse 1.6s infinite}
+.chip.agent{color:var(--value);border-color:var(--value)}
+.chip svg{width:13px;height:13px}
+.acct{display:flex;align-items:center;gap:8px}
 .acct .id{font-family:var(--font-mono);font-size:12px;color:var(--fg-muted)}
-.avatar{width:32px;height:32px;border-radius:50%;background:var(--surface-2);border:2px solid var(--value);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
-.sidebar{border-right:1px solid var(--border);background:var(--surface);padding:14px 10px;display:flex;flex-direction:column;gap:3px}
-.nav{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:6px;color:var(--fg-muted);font-size:14px;font-weight:500;cursor:pointer;transition:150ms}
-.nav:hover{background:var(--surface-2);color:var(--fg)}
-.nav.active{background:var(--surface-2);color:var(--fg)}
-.nav.active svg{color:var(--success)}
-.nav svg{width:18px;height:18px}
-.main{overflow:hidden;position:relative}
-.view{display:none;height:100%}
-.view.on{display:block}
-.chatwrap{display:grid;grid-template-columns:1fr 320px;height:100%}
-.chat{display:flex;flex-direction:column;height:100%;min-width:0}
-.msgs{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:16px}
-.m{max-width:82%;display:flex;gap:10px}
-.m.user{align-self:flex-end;flex-direction:row-reverse}
-.m .av{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
-.m.user .av{background:var(--value);color:#020617}
-.m.bot .av{background:var(--surface-2);border:1px solid var(--agent);color:var(--agent)}
-.bubble{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;font-size:14px;min-width:0}
-.m.user .bubble{background:var(--surface-2)}
-.plan{font-size:13px;color:var(--fg-muted)}
-.step{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:11px 12px;margin-top:8px;animation:slide .3s var(--ease)}
-.step .row{display:flex;align-items:center;gap:9px}
-.step .ic{width:26px;height:26px;border-radius:7px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.step .ic svg{width:15px;height:15px;color:var(--agent)}
-.step .t{font-weight:600;font-size:13px}
-.step .price{margin-left:auto;font-family:var(--font-mono);font-size:13px;color:var(--value)}
-.step .paid{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;align-items:center;gap:7px;font-size:12px}
-.step .paid .chk{color:var(--success);display:flex;align-items:center;gap:5px;font-weight:500}
-.step .paid a{margin-left:auto;display:flex;align-items:center;gap:4px;font-size:12px}
-.dots{display:inline-flex;gap:3px}.dots i{width:5px;height:5px;border-radius:50%;background:var(--fg-subtle);animation:blink 1.2s infinite}
+.av{width:30px;height:30px;border-radius:50%;background:var(--surface-3);border:2px solid var(--value);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+
+.view{flex:1;min-height:0;display:none}
+.view.on{display:flex}
+
+/* Chat */
+.chatgrid{flex:1;min-height:0;display:grid;grid-template-columns:1fr 300px}
+.chatcol{display:flex;flex-direction:column;min-width:0}
+.msgs{flex:1;overflow-y:auto;padding:28px 0}
+.wrap{max-width:760px;margin:0 auto;padding:0 28px}
+.welcome{max-width:760px;margin:8vh auto 0;padding:0 28px;text-align:center}
+.welcome .hi{width:60px;height:60px;border-radius:16px;background:var(--grad);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;box-shadow:0 0 40px -8px var(--agent)}
+.welcome .hi svg{width:30px;height:30px;color:#04120E}
+.welcome h1{font-size:26px;font-weight:700;letter-spacing:-.5px;margin-bottom:8px}
+.welcome p{color:var(--fg-muted);margin-bottom:26px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:left}
+.qc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;cursor:pointer;transition:150ms}
+.qc:hover{border-color:var(--agent);background:var(--surface-2);transform:translateY(-1px)}
+.qc .qt{font-weight:600;font-size:13.5px;margin-bottom:3px;display:flex;align-items:center;gap:8px}
+.qc .qt svg{width:15px;height:15px;color:var(--agent)}
+.qc .qd{font-size:12.5px;color:var(--fg-muted)}
+
+.msg{display:flex;gap:13px;padding:14px 0}
+.msg .ava{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+.msg.user .ava{background:var(--surface-3);border:1px solid var(--border-2);color:var(--value)}
+.msg.bot .ava{background:var(--grad);color:#04120E}
+.msg .ava svg{width:17px;height:17px}
+.msg .body{min-width:0;flex:1;padding-top:4px}
+.msg .who{font-size:12px;font-weight:600;color:var(--fg-muted);margin-bottom:4px}
+.msg .content{font-size:14.5px;word-wrap:break-word}
+.msg .content p{margin:0 0 8px}.msg .content p:last-child{margin:0}
+.msg .content ul{margin:4px 0 8px;padding-left:20px}.msg .content li{margin:2px 0}
+.msg .content code{font-family:var(--font-mono);font-size:13px;background:var(--surface-3);padding:1px 5px;border-radius:4px}
+.msg .content strong{font-weight:600;color:#fff}
+.think{display:inline-flex;align-items:center;gap:8px;color:var(--fg-muted);font-size:13px}
+.dots{display:inline-flex;gap:3px}.dots i{width:5px;height:5px;border-radius:50%;background:var(--agent);animation:blink 1.2s infinite}
 .dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
-.composer{border-top:1px solid var(--border);padding:14px 20px;display:flex;gap:10px;align-items:center}
-.composer input{flex:1;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:8px;padding:12px 14px;color:var(--fg);font-family:var(--font-sans);font-size:14px;outline:none}
-.composer input:focus{border-color:var(--agent)}
-.btn{height:44px;padding:0 18px;border-radius:8px;border:none;font-family:var(--font-sans);font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:180ms}
-.btn svg{width:16px;height:16px}
-.btn-primary{background:var(--success);color:#020617}.btn-primary:hover{filter:brightness(1.1)}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.suggest{display:flex;gap:8px;padding:0 20px 14px;flex-wrap:wrap}
-.chip{font-size:12.5px;color:var(--fg-muted);border:1px solid var(--border);border-radius:100px;padding:6px 12px;cursor:pointer}
-.chip:hover{border-color:var(--agent);color:var(--fg)}
-.rail{border-left:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column}
-.rail .h{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.rail .h h3{font-size:14px;font-weight:600}
-.budget{padding:14px 16px;border-bottom:1px solid var(--border)}
-.bar{height:8px;background:var(--border);border-radius:5px;overflow:hidden;margin-top:8px}
-.bar>i{display:block;height:100%;background:var(--success);border-radius:5px;transition:width .4s}
+
+.step{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:11px 13px;margin:8px 0;animation:slide .3s var(--ease)}
+.step .r{display:flex;align-items:center;gap:10px}
+.step .si{width:28px;height:28px;border-radius:8px;background:var(--surface-3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step .si svg{width:15px;height:15px;color:var(--agent)}
+.step .st{font-weight:600;font-size:13px;text-transform:capitalize}
+.step .sd{font-size:12px;color:var(--fg-subtle)}
+.step .pr{margin-left:auto;font-family:var(--font-mono);font-size:13px;color:var(--value)}
+.step .paid{margin-top:9px;padding-top:9px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:12px}
+.step .ok{color:var(--success);display:flex;align-items:center;gap:5px;font-weight:500}
+.step .paid a{margin-left:auto;display:flex;align-items:center;gap:4px}
+.step .err{color:var(--danger);display:flex;align-items:center;gap:5px}
+
+.composer{border-top:1px solid var(--border);padding:16px 0 20px;flex-shrink:0}
+.cbox{max-width:760px;margin:0 auto;padding:0 28px;display:flex;gap:10px;align-items:flex-end}
+.cbox .field{flex:1;background:var(--surface-2);border:1px solid var(--border-2);border-radius:14px;display:flex;align-items:flex-end;padding:6px 6px 6px 16px}
+.cbox textarea{flex:1;background:none;border:none;outline:none;color:var(--fg);font-family:inherit;font-size:14.5px;resize:none;max-height:140px;padding:10px 0;line-height:1.5}
+.send{width:40px;height:40px;border-radius:10px;border:none;background:var(--grad);color:#04120E;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:150ms}
+.send:hover{filter:brightness(1.1)}.send:disabled{opacity:.4;cursor:not-allowed}
+.send svg{width:18px;height:18px}
+.hint{max-width:760px;margin:8px auto 0;padding:0 28px;font-size:11px;color:var(--fg-subtle);text-align:center}
+
+/* Spend rail */
+.rail{border-left:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;min-height:0}
+.rail .rh{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.rail .rh h3{font-size:13px;font-weight:600}
+.bud{padding:14px 16px;border-bottom:1px solid var(--border)}
+.bar{height:7px;background:var(--surface-3);border-radius:4px;overflow:hidden;margin-top:8px}
+.bar>i{display:block;height:100%;background:var(--grad);border-radius:4px;transition:width .4s}
 .spend{flex:1;overflow-y:auto;padding:8px}
-.sp{display:flex;align-items:center;gap:9px;padding:9px 8px;border-radius:6px;font-size:12.5px}
-.sp .st{width:7px;height:7px;border-radius:50%;background:var(--success);flex-shrink:0}
-.sp .f{flex:1;color:var(--fg-muted)}.sp .f b{color:var(--fg);font-weight:500}
+.sp{display:flex;align-items:center;gap:9px;padding:9px 8px;border-radius:7px;font-size:12.5px}
+.sp:hover{background:var(--surface-2)}
+.sp .d{width:7px;height:7px;border-radius:50%;background:var(--success);flex-shrink:0}
+.sp .f{flex:1;color:var(--fg-muted)}.sp .f b{color:var(--fg);font-weight:500;text-transform:capitalize}
 .sp .a{font-family:var(--font-mono);color:var(--success)}
-.empty{padding:24px 16px;text-align:center;color:var(--fg-subtle);font-size:13px}
-.mk{padding:28px;overflow-y:auto;height:100%}
-.mk h2{font-size:22px;font-weight:600;margin-bottom:4px}
-.mk .sub{color:var(--fg-muted);margin-bottom:22px;font-size:14px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
-.svc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
-.svc .ic{width:42px;height:42px;border-radius:10px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
-.svc .ic svg{width:21px;height:21px;color:var(--agent)}
+.emptyr{padding:24px 16px;text-align:center;color:var(--fg-subtle);font-size:12.5px}
+
+/* Market + MCP */
+.pane{flex:1;overflow-y:auto;padding:32px}
+.pane h1{font-size:24px;font-weight:700;letter-spacing:-.5px;margin-bottom:4px}
+.pane .sub{color:var(--fg-muted);margin-bottom:26px;font-size:14px;max-width:640px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;max-width:900px}
+.svc{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;transition:150ms}
+.svc:hover{border-color:var(--border-2);transform:translateY(-2px)}
+.svc .si{width:44px;height:44px;border-radius:11px;background:var(--surface-3);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.svc .si svg{width:22px;height:22px;color:var(--agent)}
 .svc h3{font-size:15px;font-weight:600;margin-bottom:5px;text-transform:capitalize}
 .svc p{font-size:13px;color:var(--fg-muted);margin-bottom:14px;min-height:36px}
 .svc .foot{display:flex;align-items:center;justify-content:space-between}
 .svc .p{font-family:var(--font-mono);font-size:14px;color:var(--value)}
 .svc .by{font-size:11px;color:var(--fg-subtle);font-family:var(--font-mono)}
-.mcp{padding:28px;max-width:720px}
-.mcp h2{font-size:22px;font-weight:600;margin-bottom:6px}
-.mcp p{color:var(--fg-muted);font-size:14px;margin-bottom:18px}
-.code{background:#0A0E1A;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:var(--font-mono);font-size:13px;color:#CBD5E1;white-space:pre;overflow-x:auto}
+.code{background:#060B16;border:1px solid var(--border);border-radius:12px;padding:18px;font-family:var(--font-mono);font-size:13px;color:#CBD5E1;white-space:pre;overflow-x:auto;max-width:720px}
 .code .k{color:var(--agent)}.code .s{color:var(--success)}.code .c{color:var(--fg-subtle)}
+
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-@keyframes slide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes slide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@media(max-width:1000px){.chatgrid{grid-template-columns:1fr}.rail{display:none}}
 </style>
 </head>
 <body>
 <div class="app">
-  <header class="topbar">
-    <div class="logo"><span class="dot"></span>Ghostwire</div>
-    <div class="pill"><span class="live"></span>Hedera Testnet</div>
-    <a class="pill" id="agentPill" href="#" target="_blank" style="display:none;border-color:var(--value);color:var(--value)"><i data-lucide="bot" style="width:13px;height:13px"></i><span id="agentId" class="mono"></span></a>
-    <div class="spacer"></div>
-    <div class="acct"><span class="id" id="acctId">0.0.—</span><div class="avatar" id="acctAv">··</div></div>
-  </header>
-
-  <aside class="sidebar">
-    <div class="nav active" data-v="chat"><i data-lucide="message-square"></i>Assistant</div>
-    <div class="nav" data-v="market"><i data-lucide="store"></i>Marketplace</div>
-    <div class="nav" data-v="mcp"><i data-lucide="plug"></i>Connect (MCP)</div>
-    <div style="flex:1"></div>
-    <div class="nav" onclick="logout()"><i data-lucide="log-out"></i>Disconnect</div>
+  <!-- Sidebar -->
+  <aside class="side">
+    <div class="brand"><div class="mark"><i data-lucide="zap"></i></div>Ghostwire</div>
+    <button class="newbtn" onclick="newChat()"><i data-lucide="plus"></i>New chat</button>
+    <div class="lbl">Conversations</div>
+    <div class="convs" id="convs"></div>
+    <div class="foot">
+      <div class="frow" data-v="market"><i data-lucide="store"></i>Marketplace</div>
+      <div class="frow" data-v="mcp"><i data-lucide="plug"></i>Connect (MCP)</div>
+      <div class="frow" onclick="logout()"><i data-lucide="log-out"></i>Disconnect</div>
+    </div>
   </aside>
 
-  <main class="main">
-    <!-- CHAT -->
+  <!-- Main -->
+  <div class="main">
+    <div class="tbar">
+      <h2 id="tbarTitle">Wire · Assistant</h2>
+      <div class="spacer"></div>
+      <span class="chip net"><span class="live"></span>Hedera Testnet</span>
+      <a class="chip agent" id="agentPill" href="#" target="_blank" style="display:none"><i data-lucide="bot"></i><span id="agentId" class="mono"></span></a>
+      <div class="acct"><span class="id" id="acctId">0x…</span><div class="av" id="acctAv">··</div></div>
+    </div>
+
+    <!-- CHAT VIEW -->
     <section class="view on" id="v-chat">
-      <div class="chatwrap">
-        <div class="chat">
-          <div class="msgs" id="msgs">
-            <div class="m bot"><div class="av">GW</div><div class="bubble">Hi 👋 I'm your Ghostwire assistant. Give me a task — I'll hire and pay the services I need, for real, on Hedera.</div></div>
-          </div>
-          <div class="suggest" id="suggest">
-            <div class="chip" onclick="quick(this)">Translate to French: our revenue grew 12% this quarter</div>
-            <div class="chip" onclick="quick(this)">Fact-check: the EUR/USD rate is above 1.05</div>
-            <div class="chip" onclick="quick(this)">Summarize: x402 lets AI agents pay per request over HTTP 402, settling stablecoins so software can buy APIs without accounts or keys.</div>
-          </div>
+      <div class="chatgrid">
+        <div class="chatcol">
+          <div class="msgs" id="msgs"></div>
           <div class="composer">
-            <input id="inp" placeholder="Ask the assistant to do something..." autocomplete="off" onkeydown="if(event.key==='Enter')send()">
-            <button class="btn btn-primary" id="sendBtn" onclick="send()"><i data-lucide="send"></i>Send</button>
+            <div class="cbox">
+              <div class="field">
+                <textarea id="inp" rows="1" placeholder="Ask Wire to do something…" oninput="autg(this)" onkeydown="keyd(event)"></textarea>
+              </div>
+              <button class="send" id="sendBtn" onclick="send()"><i data-lucide="arrow-up"></i></button>
+            </div>
+            <div class="hint">Wire hires and pays real services on Hedera. Each tool call is a live on-chain payment.</div>
           </div>
         </div>
         <div class="rail">
-          <div class="h"><h3>Spend log</h3><span class="label">on-chain</span></div>
-          <div class="budget">
-            <div style="display:flex;justify-content:space-between;font-size:13px"><span class="muted">Spent this session</span><span class="mono" id="budTxt">0.000 ℏ</span></div>
+          <div class="rh"><h3>Spend log</h3><span class="subtle" style="font-size:11px;text-transform:uppercase;letter-spacing:1px">on-chain</span></div>
+          <div class="bud">
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span class="muted">This session</span><span class="mono" id="budTxt">0.000 ℏ</span></div>
             <div class="bar"><i id="budBar" style="width:0%"></i></div>
           </div>
-          <div class="spend" id="spend"><div class="empty">Payments the assistant makes will appear here, with HashScan proof.</div></div>
+          <div class="spend" id="spend"><div class="emptyr">Payments Wire makes appear here, with HashScan proof.</div></div>
         </div>
       </div>
     </section>
 
     <!-- MARKETPLACE -->
     <section class="view" id="v-market">
-      <div class="mk">
-        <h2>Service marketplace</h2>
-        <div class="sub">Pay-per-call AI services, settled in HBAR over x402 on Hedera. Your assistant hires these automatically.</div>
-        <div class="grid" id="grid"><div class="empty">Loading services…</div></div>
+      <div class="pane">
+        <h1>Service marketplace</h1>
+        <div class="sub">Pay-per-call AI services, settled in HBAR over x402 on Hedera. Wire hires these automatically to complete your tasks.</div>
+        <div class="grid" id="grid"><div class="emptyr">Loading…</div></div>
       </div>
     </section>
 
     <!-- MCP -->
     <section class="view" id="v-mcp">
-      <div class="mcp">
-        <h2>Connect any AI agent (MCP)</h2>
-        <p>Ghostwire exposes its marketplace as an <b>MCP server</b>. Any MCP client — Claude Desktop, Cursor, or your own agent — can discover these tools and pay for them autonomously via x402 on Hedera. No API keys, no subscriptions.</p>
+      <div class="pane">
+        <h1>Connect any AI agent (MCP)</h1>
+        <div class="sub">Ghostwire exposes its marketplace as an MCP server. Any MCP client — Claude Desktop, Cursor, or your own agent — can discover these tools and pay for them autonomously via x402 on Hedera. No API keys, no subscriptions.</div>
         <div class="code"><span class="c">// Add Ghostwire to your MCP client config</span>
 {
   <span class="k">"mcpServers"</span>: {
@@ -176,14 +233,13 @@ a{color:var(--info);text-decoration:none}
     }
   }
 }</div>
-        <p style="margin-top:18px;font-size:13px" class="subtle">Note: the MCP endpoint is on the roadmap — the same paid tools you see in the chat will be exposed here.</p>
+        <p class="subtle" style="margin-top:16px;font-size:13px;max-width:720px">The MCP endpoint is on the roadmap — the same paid tools Wire uses in the chat will be exposed here.</p>
       </div>
     </section>
-  </main>
+  </div>
 </div>
 
 <script>
-// session guard
 const s = JSON.parse(localStorage.getItem('ghostwire.session') || 'null');
 if(!s){ location.replace('index.html'); }
 lucide.createIcons();
@@ -192,104 +248,182 @@ function shortAv(a){ return a ? (a.startsWith('0x') ? a.slice(2,4) : a.replace(/
 if(s){ document.getElementById('acctId').textContent=shortAddr(s.account); document.getElementById('acctAv').textContent=shortAv(s.account); }
 function logout(){ localStorage.removeItem('ghostwire.session'); location.href='index.html'; }
 
-// nav
-document.querySelectorAll('.nav[data-v]').forEach(n=>n.onclick=()=>{
-  document.querySelectorAll('.nav[data-v]').forEach(x=>x.classList.remove('active'));
+const ICONS={summarize:'file-text',translate:'languages',factcheck:'badge-check',web_fetch:'globe'};
+const META={};
+const msgs=document.getElementById('msgs'), convsEl=document.getElementById('convs'), spend=document.getElementById('spend');
+const inp=document.getElementById('inp'), sendBtn=document.getElementById('sendBtn');
+let ws=null, currentConv=null, curBubble=null, curCard=null, busy=false, used=0;
+
+/* ---- view switching ---- */
+document.querySelectorAll('.frow[data-v]').forEach(n=>n.onclick=()=>{
+  document.querySelectorAll('.frow[data-v]').forEach(x=>x.classList.remove('active'));
   n.classList.add('active');
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
   document.getElementById('v-'+n.dataset.v).classList.add('on');
+  document.getElementById('tbarTitle').textContent = n.dataset.v==='market'?'Marketplace':'Connect · MCP';
 });
+function showChat(){ document.querySelectorAll('.frow[data-v]').forEach(x=>x.classList.remove('active')); document.querySelectorAll('.view').forEach(v=>v.classList.remove('on')); document.getElementById('v-chat').classList.add('on'); document.getElementById('tbarTitle').textContent='Wire · Assistant'; }
 
-const ICONS={summarize:'file-text',translate:'languages',factcheck:'badge-check',web_fetch:'search'};
-const META={};
+/* ---- markdown (safe, minimal) ---- */
+function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function md(t){
+  t=esc(t||'');
+  t=t.replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  const lines=t.split('\n'); let html='',inList=false;
+  for(let l of lines){
+    if(/^\s*[-*]\s+/.test(l)){ if(!inList){html+='<ul>';inList=true;} html+='<li>'+l.replace(/^\s*[-*]\s+/,'')+'</li>'; }
+    else { if(inList){html+='</ul>';inList=false;} if(l.trim())html+='<p>'+l+'</p>'; }
+  }
+  if(inList)html+='</ul>';
+  return html||'<p></p>';
+}
+function fmtTime(ts){const d=(Date.now()-ts)/1000;if(d<60)return 'now';if(d<3600)return Math.floor(d/60)+'m';if(d<86400)return Math.floor(d/3600)+'h';return Math.floor(d/86400)+'d';}
 
-// marketplace
-fetch('/api/tools').then(r=>r.json()).then(tools=>{
-  tools.forEach(t=>META[t.name]=t);
-  document.getElementById('grid').innerHTML=tools.map(t=>`
-    <div class="svc"><div class="ic"><i data-lucide="${ICONS[t.name]||'wrench'}"></i></div>
-    <h3>${t.name.replace('_',' ')}</h3><p>${t.description}</p>
-    <div class="foot"><span class="p">${t.price} ℏ</span><span class="by">by ${t.provider||''}</span></div></div>`).join('');
+/* ---- conversation list ---- */
+async function loadConvs(){
+  try{
+    const list = await (await fetch('/api/conversations?user='+encodeURIComponent(s.account))).json();
+    convsEl.innerHTML = list.length ? list.map(c=>`
+      <div class="conv ${c.id===currentConv?'active':''}" data-id="${c.id}" onclick="openConv('${c.id}')">
+        <i data-lucide="message-square" class="ci"></i>
+        <span class="tt">${esc(c.title)}</span>
+        <button class="del" onclick="delConv(event,'${c.id}')"><i data-lucide="trash-2"></i></button>
+      </div>`).join('') : '<div class="emptyr" style="padding:14px">No conversations yet.</div>';
+    lucide.createIcons();
+  }catch(_){}
+}
+async function openConv(id){
+  showChat();
+  currentConv=id;
+  document.querySelectorAll('.conv').forEach(c=>c.classList.toggle('active',c.dataset.id===id));
+  msgs.innerHTML='';
+  try{
+    const c = await (await fetch('/api/conversation/'+id)).json();
+    (c.messages||[]).forEach(m=>{
+      if(m.role==='user') addUser(m.content);
+      else addBot(m.content, m.steps||[]);
+    });
+  }catch(_){}
+  scroll();
+}
+async function delConv(e,id){
+  e.stopPropagation();
+  await fetch('/api/conversation/'+id,{method:'DELETE'});
+  if(currentConv===id){ currentConv=null; msgs.innerHTML=''; showWelcome(); }
+  loadConvs();
+}
+function newChat(){ showChat(); currentConv=null; msgs.innerHTML=''; showWelcome(); document.querySelectorAll('.conv').forEach(c=>c.classList.remove('active')); inp.focus(); }
+
+/* ---- rendering ---- */
+function showWelcome(){
+  msgs.innerHTML=`<div class="welcome">
+    <div class="hi"><i data-lucide="zap"></i></div>
+    <h1>Hey, I'm Wire.</h1>
+    <p>Give me a task — I'll hire and pay the services I need, for real, on Hedera.</p>
+    <div class="cards">
+      <div class="qc" onclick="quick('Translate to French: our revenue grew 12% this quarter')"><div class="qt"><i data-lucide="languages"></i>Translate</div><div class="qd">Turn a sentence into French, paid on-chain</div></div>
+      <div class="qc" onclick="quick('Fact-check: the EUR/USD rate is above 1.05')"><div class="qt"><i data-lucide="badge-check"></i>Fact-check</div><div class="qd">Verify a claim against real reasoning</div></div>
+      <div class="qc" onclick="quick('Summarize: x402 lets AI agents pay per request over HTTP 402, settling stablecoins so software can buy APIs without accounts or keys.')"><div class="qt"><i data-lucide="file-text"></i>Summarize</div><div class="qd">Condense a paragraph to key points</div></div>
+      <div class="qc" onclick="quick('Fetch https://hedera.com and tell me what it is')"><div class="qt"><i data-lucide="globe"></i>Web fetch</div><div class="qd">Read a live page and explain it</div></div>
+    </div></div>`;
   lucide.createIcons();
-}).catch(()=>{});
+}
+function addUser(text){
+  if(msgs.querySelector('.welcome'))msgs.innerHTML='';
+  const d=document.createElement('div');d.className='msg user';
+  d.innerHTML=`<div class="ava">${shortAv(s.account)}</div><div class="body"><div class="who">You</div><div class="content"></div></div>`;
+  d.querySelector('.content').textContent=text;msgs.appendChild(d);scroll();
+}
+function addBot(content, steps){
+  const d=document.createElement('div');d.className='msg bot';
+  d.innerHTML=`<div class="ava"><i data-lucide="zap"></i></div><div class="body"><div class="who">Wire</div><div class="steps"></div><div class="content"></div></div>`;
+  msgs.appendChild(d);
+  const st=d.querySelector('.steps');
+  (steps||[]).forEach(step=>st.appendChild(renderStep(step,true)));
+  d.querySelector('.content').innerHTML=md(content);
+  lucide.createIcons();scroll();
+  return d;
+}
+function renderStep(step, finished){
+  const meta=META[step.tool]||{};
+  const c=document.createElement('div');c.className='step';
+  c.innerHTML=`<div class="r"><div class="si"><i data-lucide="${ICONS[step.tool]||'wrench'}"></i></div>
+    <div><div class="st">${step.tool.replace('_',' ')}</div><div class="sd">${meta.description||''}</div></div>
+    <div class="pr">${step.price} ℏ</div></div>
+    <div class="paid">${finished?paidHtml(step):`<span class="think"><span class="dots"><i></i><i></i><i></i></span> paying on Hedera…</span>`}</div>`;
+  return c;
+}
+function paidHtml(step){
+  if(step.status==='error') return `<span class="err"><i data-lucide="shield-x" style="width:13px;height:13px"></i>${step.message||'payment error'}</span>`;
+  return `<span class="ok"><i data-lucide="check-circle" style="width:14px;height:14px"></i>Paid ${step.price} ℏ</span>${step.hashscan?`<a href="${step.hashscan}" target="_blank">HashScan <i data-lucide="external-link" style="width:12px;height:12px"></i></a>`:''}`;
+}
+function scroll(){msgs.scrollTop=msgs.scrollHeight;}
+function addSpend(tool,amt,link){
+  if(spend.querySelector('.emptyr'))spend.innerHTML='';
+  const d=document.createElement('div');d.className='sp';
+  d.innerHTML=`<span class="d"></span><span class="f"><b>${tool.replace('_',' ')}</b></span><a class="a" href="${link}" target="_blank">+${amt}</a>`;
+  spend.prepend(d);
+  used+=parseFloat(amt);document.getElementById('budTxt').textContent=used.toFixed(3)+' ℏ';document.getElementById('budBar').style.width=Math.min(100,used*100)+'%';
+}
 
-// chat over websocket
-const msgs=document.getElementById('msgs'), spend=document.getElementById('spend'), inp=document.getElementById('inp'), sendBtn=document.getElementById('sendBtn');
-let used=0, ws=null, curBubble=null, curCard=null, busy=false;
-
+/* ---- websocket ---- */
 function connect(){
   const proto=location.protocol==='https:'?'wss':'ws';
   ws=new WebSocket(`${proto}://${location.host}/ws`);
-  ws.onmessage=(m)=>{ let d; try{d=JSON.parse(m.data);}catch(_){return;} handle(d); };
+  ws.onmessage=(m)=>{let d;try{d=JSON.parse(m.data);}catch(_){return;}handle(d);};
   ws.onclose=()=>setTimeout(connect,2000);
   ws.onerror=()=>ws.close();
 }
 connect();
 
-function scroll(){msgs.scrollTop=msgs.scrollHeight;}
-function userMsg(t){const d=document.createElement('div');d.className='m user';d.innerHTML=`<div class="av">${s?shortAv(s.account):'ME'}</div><div class="bubble"></div>`;d.querySelector('.bubble').textContent=t;msgs.appendChild(d);scroll();}
-function botBubble(){const d=document.createElement('div');d.className='m bot';d.innerHTML=`<div class="av">GW</div><div class="bubble"><div class="plan"><span class="dots"><i></i><i></i><i></i></span> thinking…</div></div>`;msgs.appendChild(d);scroll();return d.querySelector('.bubble');}
-
-function addSpend(name,amt,link){
-  if(spend.querySelector('.empty'))spend.innerHTML='';
-  const d=document.createElement('div');d.className='sp';
-  d.innerHTML=`<span class="st"></span><span class="f"><b>${name.replace('_',' ')}</b></span><a class="a mono" href="${link}" target="_blank">+${amt}</a>`;
-  spend.prepend(d);
-  used+=parseFloat(amt);document.getElementById('budTxt').textContent=used.toFixed(3)+' ℏ';document.getElementById('budBar').style.width=Math.min(100,used/1*100)+'%';
-}
-
 function handle(d){
-  if(d.type==='snapshot')return;
-  if(d.type==='agent-preparing'){
-    const plan=curBubble&&curBubble.querySelector('.plan'); if(plan)plan.innerHTML=`<span class="dots"><i></i><i></i><i></i></span> preparing your agent…`;
+  if(d.type==='conversation'){
+    if(!currentConv){ currentConv=d.id; loadConvs(); }
     return;
   }
+  if(d.type==='agent-preparing'){ setPlan(`<span class="dots"><i></i><i></i><i></i></span> preparing your agent…`); return; }
   if(d.type==='agent-info'){
     const pill=document.getElementById('agentPill');
     document.getElementById('agentId').textContent=' '+shortAddr(d.accountId);
-    pill.href='https://hashscan.io/testnet/account/'+d.accountId;
-    pill.style.display='inline-flex';
-    if(d.created){ const plan=curBubble&&curBubble.querySelector('.plan'); if(plan)plan.innerHTML=`<span class="dots"><i></i><i></i><i></i></span> your agent <span class="mono">${shortAddr(d.accountId)}</span> is ready, working…`; }
-    lucide.createIcons();
-    return;
+    pill.href='https://hashscan.io/testnet/account/'+d.accountId; pill.style.display='inline-flex';
+    setPlan(`<span class="dots"><i></i><i></i><i></i></span> ${d.created?'your agent is ready, working…':'thinking…'}`);
+    lucide.createIcons(); return;
   }
   if(d.type==='chat-step'){
-    const meta=META[d.tool]||{};
-    if(d.phase==='start'){
-      const c=document.createElement('div');c.className='step';
-      c.innerHTML=`<div class="row"><div class="ic"><i data-lucide="${ICONS[d.tool]||'wrench'}"></i></div>
-        <div><div class="t" style="text-transform:capitalize">${d.tool.replace('_',' ')}</div><div class="d subtle" style="font-size:12px">${meta.description||''}</div></div>
-        <div class="price">${d.price} ℏ</div></div>
-        <div class="paid"><span class="dots"><i></i><i></i><i></i></span> <span class="muted" style="font-size:12px">paying on Hedera…</span></div>`;
-      const plan=curBubble.querySelector('.plan'); if(plan)plan.textContent='';
-      curBubble.appendChild(c);curCard=c;lucide.createIcons();scroll();
-    } else if(d.phase==='paid' && curCard){
-      curCard.querySelector('.paid').innerHTML=`<span class="chk"><i data-lucide="check-circle" style="width:14px;height:14px"></i>Paid ${d.price} ℏ</span><a href="${d.hashscan}" target="_blank">HashScan <i data-lucide="external-link" style="width:12px;height:12px"></i></a>`;
-      lucide.createIcons();scroll();addSpend(d.tool,d.price,d.hashscan);
-    } else if(d.phase==='error' && curCard){
-      curCard.querySelector('.paid').innerHTML=`<span style="color:var(--danger);font-size:12px;display:flex;align-items:center;gap:5px"><i data-lucide="shield-x" style="width:13px;height:13px"></i>${d.message||'payment error'}</span>`;lucide.createIcons();scroll();
-    }
-  } else if(d.type==='chat-final'){
-    const plan=curBubble.querySelector('.plan'); if(plan)plan.remove();
-    const t=document.createElement('div');t.style.whiteSpace='pre-wrap';t.textContent=d.content||'(no answer)';curBubble.appendChild(t);
-    done();scroll();
-  } else if(d.type==='chat-error'){
-    const plan=curBubble.querySelector('.plan'); if(plan)plan.textContent='';
-    const t=document.createElement('div');t.style.color='var(--danger)';t.style.fontSize='13px';t.textContent='Error: '+(d.message||'something went wrong');curBubble.appendChild(t);done();
-  }
+    const stEl=curBubble.querySelector('.steps');
+    if(d.phase==='start'){ clearPlan(); const c=renderStep({tool:d.tool,price:d.price},false); stEl.appendChild(c); curCard=c; lucide.createIcons(); scroll(); }
+    else if(d.phase==='paid' && curCard){ curCard.querySelector('.paid').innerHTML=paidHtml({status:'paid',price:d.price,hashscan:d.hashscan}); lucide.createIcons(); scroll(); addSpend(d.tool,d.price,d.hashscan); }
+    else if(d.phase==='error' && curCard){ curCard.querySelector('.paid').innerHTML=paidHtml({status:'error',message:d.message}); lucide.createIcons(); scroll(); }
+  } else if(d.type==='chat-final'){ clearPlan(); curBubble.querySelector('.content').innerHTML=md(d.content); done(); scroll(); }
+  else if(d.type==='chat-error'){ clearPlan(); curBubble.querySelector('.content').innerHTML=`<p style="color:var(--danger)">Error: ${esc(d.message||'something went wrong')}</p>`; done(); }
+}
+function setPlan(html){ const p=curBubble&&curBubble.querySelector('.content'); if(p)p.innerHTML=`<div class="think">${html}</div>`; scroll(); }
+function clearPlan(){ const p=curBubble&&curBubble.querySelector('.content'); if(p && p.querySelector('.think'))p.innerHTML=''; }
+function done(){busy=false;sendBtn.disabled=false;inp.disabled=false;curCard=null;inp.focus();}
+
+/* ---- input ---- */
+function autg(el){el.style.height='auto';el.style.height=Math.min(140,el.scrollHeight)+'px';}
+function keyd(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} }
+function quick(t){inp.value=t;send();}
+function send(){
+  const v=inp.value.trim(); if(!v||busy||!ws||ws.readyState!==1)return;
+  inp.value='';autg(inp);busy=true;sendBtn.disabled=true;inp.disabled=true;
+  addUser(v);
+  curBubble=addBot('',[]); setPlan(`<span class="dots"><i></i><i></i><i></i></span> thinking…`);
+  ws.send(JSON.stringify({type:'chat',text:v,user:s.account,conversationId:currentConv}));
 }
 
-function done(){busy=false;sendBtn.disabled=false;inp.disabled=false;curCard=null;inp.focus();}
-function quick(el){inp.value=el.textContent;send();}
-function send(){
-  const v=inp.value.trim(); if(!v||busy)return;
-  if(!ws||ws.readyState!==1){return;}
-  document.getElementById('suggest').style.display='none';
-  inp.value='';busy=true;sendBtn.disabled=true;inp.disabled=true;
-  userMsg(v);
-  curBubble=botBubble();
-  ws.send(JSON.stringify({type:'chat',text:v,user:s?s.account:''}));
-}
+/* ---- init ---- */
+fetch('/api/tools').then(r=>r.json()).then(tools=>{
+  tools.forEach(t=>META[t.name]=t);
+  document.getElementById('grid').innerHTML=tools.map(t=>`
+    <div class="svc"><div class="si"><i data-lucide="${ICONS[t.name]||'wrench'}"></i></div>
+    <h3>${t.name.replace('_',' ')}</h3><p>${t.description}</p>
+    <div class="foot"><span class="p">${t.price} ℏ</span><span class="by">by ${shortAddr(t.provider||'')}</span></div></div>`).join('');
+  lucide.createIcons();
+}).catch(()=>{});
+loadConvs();
+showWelcome();
 </script>
 </body>
 </html>

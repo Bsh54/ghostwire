@@ -5,15 +5,19 @@ import { TOOLS, TOOL_DEFS } from "./tools.js";
 import { payFrom } from "./pay.js";
 import { emitEvent } from "./bus.js";
 
-const SYSTEM = `You are Ghostwire, an assistant that gets things done by hiring paid tools.
-Each tool call costs a tiny HBAR micro-payment, settled automatically on the Hedera network.
-Use tools when they genuinely help; otherwise answer directly. Keep replies concise and clear.`;
+const SYSTEM = `You are Wire, the Ghostwire assistant — sharp, friendly and to the point.
+You get things done by hiring paid tools; each tool call costs a tiny HBAR micro-payment
+settled automatically on Hedera. Use tools when they genuinely help; otherwise answer directly.
+Keep replies concise and use light Markdown (bold, short lists) when it improves clarity.`;
 
-export async function runChat(userText, emit, agent) {
+export async function runChat(userText, emit, agent, history = []) {
   const messages = [
     { role: "system", content: SYSTEM },
+    ...history.map((m) => ({ role: m.role, content: m.content })),
     { role: "user", content: userText },
   ];
+  const steps = [];
+  let finalContent = "";
 
   for (let turn = 0; turn < 6; turn++) {
     let msg;
@@ -21,7 +25,7 @@ export async function runChat(userText, emit, agent) {
       msg = await chatCompletion(messages, TOOL_DEFS);
     } catch (e) {
       emit({ type: "chat-error", message: String(e.message || e) });
-      return;
+      return { content: "", steps };
     }
     messages.push(msg);
 
@@ -50,6 +54,7 @@ export async function runChat(userText, emit, agent) {
           continue;
         }
         emit({ type: "chat-step", phase: "paid", tool: name, price: tool.price, hashscan: pay.hashscan, txId: pay.txId, from: agent.accountId });
+        steps.push({ tool: name, price: tool.price, hashscan: pay.hashscan, status: "paid" });
         emitEvent({ type: "payment", from: agent.accountId, to: name, amount: tool.price, hashscan: pay.hashscan, service: name });
 
         // Run the actual service work.
@@ -61,8 +66,11 @@ export async function runChat(userText, emit, agent) {
       continue; // let the model use the tool results
     }
 
-    emit({ type: "chat-final", content: msg.content || "" });
-    return;
+    finalContent = msg.content || "";
+    emit({ type: "chat-final", content: finalContent });
+    return { content: finalContent, steps };
   }
-  emit({ type: "chat-final", content: "I stopped after several steps to stay safe." });
+  finalContent = "I stopped after several steps to stay safe.";
+  emit({ type: "chat-final", content: finalContent });
+  return { content: finalContent, steps };
 }
