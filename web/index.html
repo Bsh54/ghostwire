@@ -172,13 +172,9 @@ footer .wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
         <span class="d" style="background:#EF4444"></span>
         <span class="d" style="background:#FBBF24"></span>
         <span class="d" style="background:#22C55E"></span>
-        <span class="label">agent economy · live</span>
+        <span class="label">agent economy — illustration</span>
       </div>
       <canvas id="viz-canvas"></canvas>
-      <div class="viz-foot">
-        <span><span class="k">Settled (last min)</span> &nbsp;<span class="v mono" id="vizVol">$0.412</span></span>
-        <span><span class="k">Payments</span> &nbsp;<span class="v mono" id="vizCnt">128</span></span>
-      </div>
     </div>
   </div>
 </header>
@@ -336,7 +332,8 @@ function draw(){
 }
 function loop(){step();for(const p of pulses)p.t+=.022;pulses=pulses.filter(p=>p.t<1);draw();requestAnimationFrame(loop);}
 loop();
-setInterval(()=>{const e=edges[Math.random()*edges.length|0];const blocked=Math.random()<.12;pulses.push({e:[...e],t:0,c:blocked?'#EF4444':'#22C55E'});if(!blocked){vol+=0.001;cnt++;document.getElementById('vizVol').textContent='$'+vol.toFixed(3);document.getElementById('vizCnt').textContent=cnt;}},850);
+// Decorative hero animation only (no data shown).
+setInterval(()=>{const e=edges[Math.random()*edges.length|0];pulses.push({e:[...e],t:0,c:'#22C55E'});},850);
 </script>
 </body>
 </html>
