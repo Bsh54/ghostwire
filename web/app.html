@@ -296,7 +296,7 @@ const WIRE_AV=avatar('Wire the Commander','22C55E');
 if(s){ const av=document.getElementById('acctAv'); av.innerHTML=`<img src="${avatar(s.account,'F59E0B')}" alt="">`; av.title=s.account; }
 function logout(){ localStorage.removeItem('ghostwire.session'); location.href='index.html'; }
 
-const ICONS={ticker:'radar',reader:'radio',verifier:'badge-check',ledger:'search-check',notary:'stamp'};
+const ICONS={token_detective:'scan-search',defi_pulse:'gauge',wallet_profiler:'user-search',dex_quote:'arrow-left-right',deep_researcher:'telescope',whale_watcher:'waves'};
 const META={};
 const msgs=document.getElementById('msgs'), convsEl=document.getElementById('convs'), spend=document.getElementById('spend');
 const inp=document.getElementById('inp'), sendBtn=document.getElementById('sendBtn');
@@ -395,10 +395,10 @@ function showWelcome(){
     <h1>Hey, I'm Wire.</h1>
     <p>Give me a task — I'll hire and pay the services I need, for real, on Hedera.</p>
     <div class="cards">
-      <div class="qc" onclick="quick('What is the current price of HBAR?')"><div class="qt"><i data-lucide="radar"></i>Live price</div><div class="qd">Eagleton pulls HBAR's real price &amp; 24h move</div></div>
-      <div class="qc" onclick="quick('Read https://hedera.com and tell me what it is')"><div class="qt"><i data-lucide="radio"></i>Read a page</div><div class="qd">Corvus fetches a live web page</div></div>
-      <div class="qc" onclick="quick('Look up Hedera account 0.0.98')"><div class="qt"><i data-lucide="search-check"></i>On-chain lookup</div><div class="qd">Ursus reads a real Hedera account</div></div>
-      <div class="qc" onclick="quick('Anchor this on Hedera: Ghostwire demo run')"><div class="qt"><i data-lucide="stamp"></i>Anchor on-chain</div><div class="qd">Athena writes it to the immutable ledger</div></div>
+      <div class="qc" onclick="quick('Scan the token SAUCE — is it safe?')"><div class="qt"><i data-lucide="scan-search"></i>Token scan</div><div class="qd">Eagleton checks liquidity, volume &amp; red flags</div></div>
+      <div class="qc" onclick="quick('What is the crypto market sentiment right now?')"><div class="qt"><i data-lucide="gauge"></i>Market pulse</div><div class="qd">Luna reads Fear &amp; Greed + trending</div></div>
+      <div class="qc" onclick="quick('Profile Hedera account 0.0.98')"><div class="qt"><i data-lucide="user-search"></i>Wallet profile</div><div class="qd">Ursus reads a real Hedera account</div></div>
+      <div class="qc" onclick="quick('What are the biggest recent HBAR whale moves?')"><div class="qt"><i data-lucide="waves"></i>Whale watch</div><div class="qd">Athena surfaces the largest transfers</div></div>
     </div></div>`;
   lucide.createIcons();
 }
