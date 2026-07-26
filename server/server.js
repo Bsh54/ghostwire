@@ -10,6 +10,7 @@ import { paymentRequired, verifyPayment } from "./src/x402.js";
 import { bus, recentEvents } from "./src/bus.js";
 import { agentList, topic } from "./src/agents.js";
 import { runChat } from "./src/chat.js";
+import { TOOLS } from "./src/tools.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3005;
@@ -20,6 +21,18 @@ app.use(express.json());
 // --- API ---
 app.get("/api/state", (_req, res) => {
   res.json({ agents: agentList(), services: SERVICES, topicId: topic(), recent: recentEvents() });
+});
+
+// The real paid tools the assistant can hire (for the marketplace UI).
+app.get("/api/tools", (_req, res) => {
+  res.json(
+    Object.entries(TOOLS).map(([name, t]) => ({
+      name,
+      price: t.price,
+      provider: t.provider,
+      description: t.def.function.description,
+    })),
+  );
 });
 
 // --- x402-protected demo endpoint (a live paywall you can call by hand) ---

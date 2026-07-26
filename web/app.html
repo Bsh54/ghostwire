@@ -4,325 +4,276 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ghostwire — Console</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
 :root{
-  --bg:#020617; --surface:#0E1223; --surface-2:#161B2E;
-  --border:#1E2A44; --border-strong:#334155;
-  --fg:#F8FAFC; --fg-muted:#94A3B8; --fg-subtle:#64748B;
-  --success:#22C55E; --value:#F59E0B; --agent:#2DD4BF;
-  --info:#38BDF8; --pending:#FBBF24; --danger:#EF4444;
-  --font-sans:'Inter',system-ui,sans-serif; --font-mono:'JetBrains Mono',monospace;
-  --radius:8px; --dur-fast:150ms; --ease-out:cubic-bezier(0.16,1,0.3,1);
+  --bg:#020617;--surface:#0E1223;--surface-2:#161B2E;--border:#1E2A44;--border-strong:#334155;
+  --fg:#F8FAFC;--fg-muted:#94A3B8;--fg-subtle:#64748B;
+  --success:#22C55E;--value:#F59E0B;--agent:#2DD4BF;--info:#38BDF8;--pending:#FBBF24;--danger:#EF4444;
+  --font-sans:'Inter',system-ui,sans-serif;--font-mono:'JetBrains Mono',monospace;--radius:8px;
+  --ease:cubic-bezier(.16,1,.3,1);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
 .mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
-.muted{color:var(--fg-muted)} .subtle{color:var(--fg-subtle)}
+.muted{color:var(--fg-muted)}.subtle{color:var(--fg-subtle)}
 a{color:var(--info);text-decoration:none}
-.label{font-size:12px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;color:var(--fg-muted)}
-.app{display:grid;grid-template-columns:240px 1fr;grid-template-rows:60px 1fr;height:100vh}
-.topbar{grid-column:1/3;display:flex;align-items:center;gap:16px;padding:0 24px;border-bottom:1px solid var(--border);background:var(--surface)}
-.sidebar{border-right:1px solid var(--border);background:var(--surface);padding:16px 12px;overflow-y:auto}
-.main{overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:24px}
-.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:18px}
-.logo .dot{width:10px;height:10px;border-radius:3px;background:var(--success)}
-.net-pill{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:5px 10px;border:1px solid var(--agent);border-radius:6px;color:var(--agent)}
-.net-pill .live{width:7px;height:7px;border-radius:50%;background:var(--agent);animation:pulse 1.6s infinite}
+.label{font-size:11px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;color:var(--fg-muted)}
+.app{display:grid;grid-template-columns:220px 1fr;grid-template-rows:58px 1fr;height:100vh}
+.topbar{grid-column:1/3;display:flex;align-items:center;gap:14px;padding:0 20px;border-bottom:1px solid var(--border);background:var(--surface)}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:17px}
+.logo .dot{width:10px;height:10px;border-radius:3px;background:var(--success);box-shadow:0 0 10px var(--success)}
+.pill{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:4px 10px;border:1px solid var(--agent);border-radius:6px;color:var(--agent)}
+.pill .live{width:7px;height:7px;border-radius:50%;background:var(--agent);animation:pulse 1.6s infinite}
 .spacer{flex:1}
-.balance{text-align:right}.balance .v{font-size:16px;font-weight:500}
-.acct{display:flex;align-items:center;gap:10px}
-.avatar{width:34px;height:34px;border-radius:50%;background:var(--surface-2);border:2px solid var(--value);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
+.acct{display:flex;align-items:center;gap:9px}
 .acct .id{font-family:var(--font-mono);font-size:12px;color:var(--fg-muted)}
-.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;color:var(--fg-muted);font-size:14px;font-weight:500;cursor:pointer;transition:var(--dur-fast)}
-.nav-item:hover{background:var(--surface-2);color:var(--fg)}
-.nav-item.active{background:var(--surface-2);color:var(--fg)}
-.nav-item.active svg{color:var(--success)}
-.nav-item svg{width:18px;height:18px}
-.nav-group{margin-top:20px}
-.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
-.kpi .label{margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.kpi .val{font-family:var(--font-mono);font-size:30px;font-weight:500}
-.kpi .delta{font-size:13px;margin-top:6px;display:flex;align-items:center;gap:4px}
-.up{color:var(--success)} .down{color:var(--danger)}
-.row{display:grid;gap:16px}
-.row-2{grid-template-columns:1fr 360px}
-.row-3{grid-template-columns:1fr 1fr}
-.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.panel-head h3{font-size:18px;font-weight:600}
-.btn{height:38px;padding:0 16px;border-radius:6px;border:none;font-family:var(--font-sans);font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:200ms}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--surface-2);border:2px solid var(--value);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+.sidebar{border-right:1px solid var(--border);background:var(--surface);padding:14px 10px;display:flex;flex-direction:column;gap:3px}
+.nav{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:6px;color:var(--fg-muted);font-size:14px;font-weight:500;cursor:pointer;transition:150ms}
+.nav:hover{background:var(--surface-2);color:var(--fg)}
+.nav.active{background:var(--surface-2);color:var(--fg)}
+.nav.active svg{color:var(--success)}
+.nav svg{width:18px;height:18px}
+.main{overflow:hidden;position:relative}
+.view{display:none;height:100%}
+.view.on{display:block}
+.chatwrap{display:grid;grid-template-columns:1fr 320px;height:100%}
+.chat{display:flex;flex-direction:column;height:100%;min-width:0}
+.msgs{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:16px}
+.m{max-width:82%;display:flex;gap:10px}
+.m.user{align-self:flex-end;flex-direction:row-reverse}
+.m .av{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+.m.user .av{background:var(--value);color:#020617}
+.m.bot .av{background:var(--surface-2);border:1px solid var(--agent);color:var(--agent)}
+.bubble{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;font-size:14px;min-width:0}
+.m.user .bubble{background:var(--surface-2)}
+.plan{font-size:13px;color:var(--fg-muted)}
+.step{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:11px 12px;margin-top:8px;animation:slide .3s var(--ease)}
+.step .row{display:flex;align-items:center;gap:9px}
+.step .ic{width:26px;height:26px;border-radius:7px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step .ic svg{width:15px;height:15px;color:var(--agent)}
+.step .t{font-weight:600;font-size:13px}
+.step .price{margin-left:auto;font-family:var(--font-mono);font-size:13px;color:var(--value)}
+.step .paid{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;align-items:center;gap:7px;font-size:12px}
+.step .paid .chk{color:var(--success);display:flex;align-items:center;gap:5px;font-weight:500}
+.step .paid a{margin-left:auto;display:flex;align-items:center;gap:4px;font-size:12px}
+.dots{display:inline-flex;gap:3px}.dots i{width:5px;height:5px;border-radius:50%;background:var(--fg-subtle);animation:blink 1.2s infinite}
+.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
+.composer{border-top:1px solid var(--border);padding:14px 20px;display:flex;gap:10px;align-items:center}
+.composer input{flex:1;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:8px;padding:12px 14px;color:var(--fg);font-family:var(--font-sans);font-size:14px;outline:none}
+.composer input:focus{border-color:var(--agent)}
+.btn{height:44px;padding:0 18px;border-radius:8px;border:none;font-family:var(--font-sans);font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:180ms}
+.btn svg{width:16px;height:16px}
 .btn-primary{background:var(--success);color:#020617}.btn-primary:hover{filter:brightness(1.1)}
-.btn-ghost{background:transparent;border:1px solid var(--border-strong);color:var(--fg)}.btn-ghost:hover{background:var(--surface-2)}
-.hero{position:relative;min-height:420px;padding:0;overflow:hidden}
-.hero-head{position:absolute;top:16px;left:20px;right:20px;z-index:2;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
-.hero-head .btn{pointer-events:auto}
-#graph{display:block;width:100%;height:420px}
-.legend{position:absolute;bottom:14px;left:20px;display:flex;gap:16px;font-size:12px;z-index:2}
-.legend span{display:flex;align-items:center;gap:6px;color:var(--fg-muted)}
-.legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
-.feed{height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
-.tx{display:flex;align-items:center;gap:10px;padding:10px 8px;border-radius:6px;font-size:13px;animation:slideIn .25s var(--ease-out)}
-.tx:hover{background:var(--surface-2)}
-.tx .st{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.tx .st.ok{background:var(--success)} .tx .st.block{background:var(--danger)}
-.tx .flow{flex:1;color:var(--fg-muted)} .tx .flow b{color:var(--fg);font-weight:500}
-.tx .amt{font-family:var(--font-mono);font-weight:500}
-.tx .amt.pos{color:var(--success)} .tx .amt.neg{color:var(--danger)}
-.tx .ts{font-family:var(--font-mono);font-size:11px;color:var(--fg-subtle);width:52px;text-align:right}
-.agents{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.agent-card{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
-.agent-card .top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.agent-av{width:36px;height:36px;border-radius:50%;background:var(--bg);border:2px solid var(--agent);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;color:var(--agent)}
-.agent-card .id{font-family:var(--font-mono);font-size:11px;color:var(--fg-muted);display:flex;align-items:center;gap:5px}
-.agent-card .id svg{width:12px;height:12px;cursor:pointer}
-.trust{height:5px;background:var(--border);border-radius:3px;margin:10px 0 4px;overflow:hidden}
-.trust>i{display:block;height:100%;background:var(--agent);border-radius:3px}
-.badge{font-size:11px;font-weight:500;padding:3px 8px;border-radius:4px;display:inline-flex;align-items:center;gap:4px}
-.badge.active{color:var(--success);border:1px solid var(--success)}
-.bullet{margin:14px 0}
-.bullet .bl{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
-.bar{position:relative;height:10px;background:var(--border);border-radius:5px}
-.bar>i{display:block;height:100%;border-radius:5px;background:var(--success)}
-.bar .cap{position:absolute;top:-3px;width:2px;height:16px;background:var(--fg)}
-.rcpt{display:flex;align-items:center;gap:10px;padding:9px 8px;font-size:13px;border-bottom:1px solid var(--border)}
-.rcpt:last-child{border:none}
-.rcpt .h{font-family:var(--font-mono);font-size:12px;color:var(--fg-muted);flex:1}
-.rcpt .st{width:8px;height:8px;border-radius:50%;display:inline-block}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
-@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.suggest{display:flex;gap:8px;padding:0 20px 14px;flex-wrap:wrap}
+.chip{font-size:12.5px;color:var(--fg-muted);border:1px solid var(--border);border-radius:100px;padding:6px 12px;cursor:pointer}
+.chip:hover{border-color:var(--agent);color:var(--fg)}
+.rail{border-left:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column}
+.rail .h{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.rail .h h3{font-size:14px;font-weight:600}
+.budget{padding:14px 16px;border-bottom:1px solid var(--border)}
+.bar{height:8px;background:var(--border);border-radius:5px;overflow:hidden;margin-top:8px}
+.bar>i{display:block;height:100%;background:var(--success);border-radius:5px;transition:width .4s}
+.spend{flex:1;overflow-y:auto;padding:8px}
+.sp{display:flex;align-items:center;gap:9px;padding:9px 8px;border-radius:6px;font-size:12.5px}
+.sp .st{width:7px;height:7px;border-radius:50%;background:var(--success);flex-shrink:0}
+.sp .f{flex:1;color:var(--fg-muted)}.sp .f b{color:var(--fg);font-weight:500}
+.sp .a{font-family:var(--font-mono);color:var(--success)}
+.empty{padding:24px 16px;text-align:center;color:var(--fg-subtle);font-size:13px}
+.mk{padding:28px;overflow-y:auto;height:100%}
+.mk h2{font-size:22px;font-weight:600;margin-bottom:4px}
+.mk .sub{color:var(--fg-muted);margin-bottom:22px;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.svc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.svc .ic{width:42px;height:42px;border-radius:10px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.svc .ic svg{width:21px;height:21px;color:var(--agent)}
+.svc h3{font-size:15px;font-weight:600;margin-bottom:5px;text-transform:capitalize}
+.svc p{font-size:13px;color:var(--fg-muted);margin-bottom:14px;min-height:36px}
+.svc .foot{display:flex;align-items:center;justify-content:space-between}
+.svc .p{font-family:var(--font-mono);font-size:14px;color:var(--value)}
+.svc .by{font-size:11px;color:var(--fg-subtle);font-family:var(--font-mono)}
+.mcp{padding:28px;max-width:720px}
+.mcp h2{font-size:22px;font-weight:600;margin-bottom:6px}
+.mcp p{color:var(--fg-muted);font-size:14px;margin-bottom:18px}
+.code{background:#0A0E1A;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:var(--font-mono);font-size:13px;color:#CBD5E1;white-space:pre;overflow-x:auto}
+.code .k{color:var(--agent)}.code .s{color:var(--success)}.code .c{color:var(--fg-subtle)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes slide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="topbar">
     <div class="logo"><span class="dot"></span>Ghostwire</div>
-    <div class="net-pill"><span class="live"></span>Hedera Testnet</div>
+    <div class="pill"><span class="live"></span>Hedera Testnet</div>
     <div class="spacer"></div>
-    <div class="balance">
-      <div class="label">Settled on-chain</div>
-      <div class="v mono" style="color:var(--value)" id="topSettled">0.000 <span class="subtle">ℏ</span></div>
-    </div>
-    <div class="acct">
-      <div class="id" id="acctId">0.0.—</div>
-      <div class="avatar" id="acctAv">··</div>
-    </div>
+    <div class="acct"><span class="id" id="acctId">0.0.—</span><div class="avatar" id="acctAv">··</div></div>
   </header>
 
   <aside class="sidebar">
-    <div class="nav-item active"><i data-lucide="activity"></i>Economy</div>
-    <div class="nav-item"><i data-lucide="bot"></i>My agents</div>
-    <div class="nav-item"><i data-lucide="store"></i>Services</div>
-    <div class="nav-item"><i data-lucide="arrow-right-left"></i>Payments</div>
-    <div class="nav-item"><i data-lucide="receipt"></i>Receipts (HCS)</div>
-    <div class="nav-group">
-      <div class="label" style="padding:0 12px 8px">Account</div>
-      <div class="nav-item"><i data-lucide="shield-check"></i>Guardrails</div>
-      <div class="nav-item"><i data-lucide="settings"></i>Settings</div>
-      <div class="nav-item" onclick="logout()"><i data-lucide="log-out"></i>Disconnect</div>
-    </div>
+    <div class="nav active" data-v="chat"><i data-lucide="message-square"></i>Assistant</div>
+    <div class="nav" data-v="market"><i data-lucide="store"></i>Marketplace</div>
+    <div class="nav" data-v="mcp"><i data-lucide="plug"></i>Connect (MCP)</div>
+    <div style="flex:1"></div>
+    <div class="nav" onclick="logout()"><i data-lucide="log-out"></i>Disconnect</div>
   </aside>
 
   <main class="main">
-    <section class="kpi-row">
-      <div class="card kpi">
-        <div class="label"><i data-lucide="dollar-sign" style="width:14px;height:14px"></i>Volume settled (24h)</div>
-        <div class="val" id="kVol">$3.412</div>
-        <div class="delta up"><i data-lucide="trending-up" style="width:14px;height:14px"></i>+12.4%</div>
-      </div>
-      <div class="card kpi">
-        <div class="label"><i data-lucide="zap" style="width:14px;height:14px"></i>Payments / min</div>
-        <div class="val" id="kTx">47</div>
-        <div class="delta up"><i data-lucide="trending-up" style="width:14px;height:14px"></i>+8</div>
-      </div>
-      <div class="card kpi">
-        <div class="label"><i data-lucide="bot" style="width:14px;height:14px"></i>Active agents</div>
-        <div class="val">9</div><div class="delta muted">of 12</div>
-      </div>
-      <div class="card kpi">
-        <div class="label"><i data-lucide="shield" style="width:14px;height:14px"></i>Budget used</div>
-        <div class="val" id="kBud">68%</div>
-        <div class="delta down"><i data-lucide="lock" style="width:14px;height:14px"></i>1 blocked</div>
-      </div>
-    </section>
-
-    <section class="row row-2">
-      <div class="card hero">
-        <div class="hero-head">
-          <div>
-            <h3 style="font-size:18px;font-weight:600">Agent economy — live</h3>
-            <div class="label" style="margin-top:4px">Payments flowing between agents in real time</div>
+    <!-- CHAT -->
+    <section class="view on" id="v-chat">
+      <div class="chatwrap">
+        <div class="chat">
+          <div class="msgs" id="msgs">
+            <div class="m bot"><div class="av">GW</div><div class="bubble">Hi 👋 I'm your Ghostwire assistant. Give me a task — I'll hire and pay the services I need, for real, on Hedera.</div></div>
           </div>
-          <button class="btn btn-ghost" id="pauseBtn"><i data-lucide="pause" style="width:16px;height:16px"></i>Pause</button>
+          <div class="suggest" id="suggest">
+            <div class="chip" onclick="quick(this)">Translate to French: our revenue grew 12% this quarter</div>
+            <div class="chip" onclick="quick(this)">Fact-check: the EUR/USD rate is above 1.05</div>
+            <div class="chip" onclick="quick(this)">Summarize: x402 lets AI agents pay per request over HTTP 402, settling stablecoins so software can buy APIs without accounts or keys.</div>
+          </div>
+          <div class="composer">
+            <input id="inp" placeholder="Ask the assistant to do something..." autocomplete="off" onkeydown="if(event.key==='Enter')send()">
+            <button class="btn btn-primary" id="sendBtn" onclick="send()"><i data-lucide="send"></i>Send</button>
+          </div>
         </div>
-        <canvas id="graph"></canvas>
-        <div class="legend">
-          <span><i style="background:var(--agent)"></i>Agent</span>
-          <span><i style="background:var(--success)"></i>Payment settled</span>
-          <span><i style="background:var(--danger)"></i>Overspend blocked</span>
+        <div class="rail">
+          <div class="h"><h3>Spend log</h3><span class="label">on-chain</span></div>
+          <div class="budget">
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span class="muted">Spent this session</span><span class="mono" id="budTxt">0.000 ℏ</span></div>
+            <div class="bar"><i id="budBar" style="width:0%"></i></div>
+          </div>
+          <div class="spend" id="spend"><div class="empty">Payments the assistant makes will appear here, with HashScan proof.</div></div>
         </div>
-      </div>
-      <div class="card">
-        <div class="panel-head"><h3>Activity feed</h3><span class="label">live</span></div>
-        <div class="feed" id="feed"></div>
       </div>
     </section>
 
-    <section class="row row-3">
-      <div class="card">
-        <div class="panel-head"><h3>Network agents</h3><span class="label" id="agentCount">—</span></div>
-        <div class="agents" id="agents"></div>
-        <div style="margin-top:20px">
-          <div class="panel-head"><h3 style="font-size:15px" id="guardTitle">Spending guardrail</h3></div>
-          <div class="bullet" id="guardrail"></div>
-        </div>
+    <!-- MARKETPLACE -->
+    <section class="view" id="v-market">
+      <div class="mk">
+        <h2>Service marketplace</h2>
+        <div class="sub">Pay-per-call AI services, settled in HBAR over x402 on Hedera. Your assistant hires these automatically.</div>
+        <div class="grid" id="grid"><div class="empty">Loading services…</div></div>
       </div>
+    </section>
 
-      <div class="card">
-        <div class="panel-head"><h3>Immutable receipts (HCS)</h3><a id="topicLink" href="#" target="_blank">Topic ↗</a></div>
-        <div id="receipts"></div>
+    <!-- MCP -->
+    <section class="view" id="v-mcp">
+      <div class="mcp">
+        <h2>Connect any AI agent (MCP)</h2>
+        <p>Ghostwire exposes its marketplace as an <b>MCP server</b>. Any MCP client — Claude Desktop, Cursor, or your own agent — can discover these tools and pay for them autonomously via x402 on Hedera. No API keys, no subscriptions.</p>
+        <div class="code"><span class="c">// Add Ghostwire to your MCP client config</span>
+{
+  <span class="k">"mcpServers"</span>: {
+    <span class="k">"ghostwire"</span>: {
+      <span class="k">"url"</span>: <span class="s">"https://ghostwire.shadrakbessanh.me/mcp"</span>,
+      <span class="k">"payment"</span>: <span class="s">"x402"</span>,
+      <span class="k">"network"</span>: <span class="s">"hedera-testnet"</span>
+    }
+  }
+}</div>
+        <p style="margin-top:18px;font-size:13px" class="subtle">Note: the MCP endpoint is on the roadmap — the same paid tools you see in the chat will be exposed here.</p>
       </div>
     </section>
   </main>
 </div>
 
 <script>
-// Session guard: require a wallet session, else back to landing.
+// session guard
 const s = JSON.parse(localStorage.getItem('ghostwire.session') || 'null');
-if(!s){ window.location.replace('index.html'); }
+if(!s){ location.replace('index.html'); }
 lucide.createIcons();
-if(s){
-  document.getElementById('acctId').textContent = s.account;
-  document.getElementById('acctAv').textContent = s.account.replace(/\D/g,'').slice(-2);
-}
-function logout(){ localStorage.removeItem('ghostwire.session'); window.location.href='index.html'; }
+if(s){ document.getElementById('acctId').textContent=s.account; document.getElementById('acctAv').textContent=s.account.replace(/\D/g,'').slice(-2); }
+function logout(){ localStorage.removeItem('ghostwire.session'); location.href='index.html'; }
 
-/* ---- Live state, fed entirely by the backend ---- */
-const NET='testnet';
-let AGENTS={}, ORDER=[], topicId=null;
-let vol=0, blockedCount=0, cntWindow=[];
-const kTx=document.getElementById('kTx'),kVol=document.getElementById('kVol'),kBud=document.getElementById('kBud');
-const feed=document.getElementById('feed');
+// nav
+document.querySelectorAll('.nav[data-v]').forEach(n=>n.onclick=()=>{
+  document.querySelectorAll('.nav[data-v]').forEach(x=>x.classList.remove('active'));
+  n.classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById('v-'+n.dataset.v).classList.add('on');
+});
 
-/* ---- Network graph (nodes built from real agents) ---- */
-const cv=document.getElementById('graph'),ctx=cv.getContext('2d');
-let W,H;function rz(){const d=devicePixelRatio||1;W=cv.clientWidth;H=420;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);}
-rz();addEventListener('resize',rz);
-let nodes=[],edges=[],idx={},pulses=[],paused=false;
+const ICONS={summarize:'file-text',translate:'languages',factcheck:'badge-check',web_fetch:'search'};
+const META={};
 
-function buildGraph(symbols){
-  nodes=symbols.map((n,i)=>({name:n,x:W/2+Math.cos(i/symbols.length*6.28)*130,y:H/2+Math.sin(i/symbols.length*6.28)*110,vx:0,vy:0}));
-  idx=Object.fromEntries(nodes.map((n,i)=>[n.name,i]));
-  edges=[];for(let i=0;i<nodes.length;i++)edges.push([i,(i+1)%nodes.length]);
-}
-function pulseFor(from,to,blocked){
-  const i=idx[from],j=idx[to];if(i==null||j==null)return;
-  let e=edges.find(([a,b])=>(a===i&&b===j)||(a===j&&b===i));
-  if(!e){e=[i,j];edges.push(e);}
-  pulses.push({e:[...e],t:0,color:blocked?'#EF4444':'#22C55E'});
-}
-function step(){
-  for(const a of nodes){for(const b of nodes){if(a===b)continue;let dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy)||1,r=1400/(d*d);a.vx+=dx/d*r;a.vy+=dy/d*r;}a.vx+=(W/2-a.x)*.0008;a.vy+=(H/2-a.y)*.0008;}
-  for(const[i,j]of edges){const a=nodes[i],b=nodes[j];let dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,f=(d-150)*.002;a.vx+=dx/d*f;a.vy+=dy/d*f;b.vx-=dx/d*f;b.vy-=dy/d*f;}
-  for(const a of nodes){a.vx*=.85;a.vy*=.85;a.x+=a.vx;a.y+=a.vy;a.x=Math.max(40,Math.min(W-40,a.x));a.y=Math.max(40,Math.min(H-40,a.y));}
-}
-function draw(){
-  ctx.clearRect(0,0,W,H);
-  for(const[i,j]of edges){const a=nodes[i],b=nodes[j];if(!a||!b)continue;ctx.strokeStyle='rgba(51,65,85,0.5)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
-  for(const p of pulses){const a=nodes[p.e[0]],b=nodes[p.e[1]];if(!a||!b)continue;const x=a.x+(b.x-a.x)*p.t,y=a.y+(b.y-a.y)*p.t;ctx.strokeStyle=p.color;ctx.globalAlpha=.5;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.globalAlpha=1;ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=12;ctx.beginPath();ctx.arc(x,y,5,0,6.28);ctx.fill();ctx.shadowBlur=0;}
-  for(const a of nodes){ctx.fillStyle='#020617';ctx.beginPath();ctx.arc(a.x,a.y,17,0,6.28);ctx.fill();ctx.strokeStyle='#2DD4BF';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#2DD4BF';ctx.font='600 11px Inter';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(a.name,a.x,a.y);}
-}
-function loop(){if(!paused){step();for(const p of pulses)p.t+=.02;pulses=pulses.filter(p=>p.t<1);}draw();requestAnimationFrame(loop);}
-loop();
-document.getElementById('pauseBtn').onclick=function(){paused=!paused;this.innerHTML=paused?'<i data-lucide="play" style="width:16px;height:16px"></i>Resume':'<i data-lucide="pause" style="width:16px;height:16px"></i>Pause';lucide.createIcons();};
-
-/* ---- Render real agents, receipts, KPIs, guardrail ---- */
-function renderAgents(){
-  const box=document.getElementById('agents');
-  box.innerHTML=ORDER.map(sym=>{
-    const a=AGENTS[sym];const pct=Math.min(100,Math.round((a.spent/a.capHbar)*100));
-    return `<div class="agent-card">
-      <div class="top"><div class="agent-av">${a.symbol}</div><div><div style="font-weight:600;font-size:14px">${a.name}</div><span class="badge active">● active</span></div></div>
-      <div class="id"><i data-lucide="badge-check"></i>${a.accountId}</div>
-      <div class="trust"><i style="width:${a.trust}%"></i></div><div class="label">Trust ${a.trust} · spent ${a.spent.toFixed(3)}/${a.capHbar} ℏ (${pct}%)</div>
-    </div>`;}).join('');
-  document.getElementById('agentCount').textContent=ORDER.length+' on-chain';
+// marketplace
+fetch('/api/tools').then(r=>r.json()).then(tools=>{
+  tools.forEach(t=>META[t.name]=t);
+  document.getElementById('grid').innerHTML=tools.map(t=>`
+    <div class="svc"><div class="ic"><i data-lucide="${ICONS[t.name]||'wrench'}"></i></div>
+    <h3>${t.name.replace('_',' ')}</h3><p>${t.description}</p>
+    <div class="foot"><span class="p">${t.price} ℏ</span><span class="by">by ${t.provider||''}</span></div></div>`).join('');
   lucide.createIcons();
-}
-function renderGuardrail(){
-  // Highlight the agent closest to its cap (the guardrail in action).
-  let top=null;for(const s of ORDER){const a=AGENTS[s];const r=a.spent/a.capHbar;if(!top||r>top.r)top={a,r};}
-  if(!top)return;const a=top.a,pct=Math.min(100,Math.round(top.r*100));
-  document.getElementById('guardTitle').textContent=`Spending guardrail — ${a.name}`;
-  document.getElementById('guardrail').innerHTML=`
-    <div class="bl"><span class="muted">Spent <b class="mono" style="color:var(--fg)">${a.spent.toFixed(3)}</b> / cap <b class="mono" style="color:var(--value)">${a.capHbar.toFixed(2)} ℏ</b></span><span class="mono muted">${pct}%</span></div>
-    <div class="bar"><i style="width:${pct}%;background:${pct>=100?'var(--danger)':'var(--success)'}"></i><span class="cap" style="left:100%"></span></div>
-    <div class="label" style="margin-top:8px;color:${blockedCount?'var(--danger)':'var(--fg-subtle)'}"><i data-lucide="lock" style="width:12px;height:12px;display:inline"></i> ${blockedCount} overspend attempt(s) blocked on-chain</div>`;
-  lucide.createIcons();
-}
-const receipts=document.getElementById('receipts');
-function addReceipt(ev){
-  if(ev.receiptSeq==null&&!ev.hashscan)return;
-  const row=document.createElement('div');row.className='rcpt';
-  row.innerHTML=`<span class="st" style="background:var(--success)"></span><span class="h">#${ev.receiptSeq??'—'} · ${ev.from}→${ev.to}</span><span class="mono" style="color:var(--success)">+${Number(ev.amount).toFixed(4)}</span><a href="${ev.hashscan||'#'}" target="_blank"><i data-lucide="external-link" style="width:14px;height:14px"></i></a>`;
-  receipts.prepend(row);while(receipts.children.length>8)receipts.lastChild.remove();
-  lucide.createIcons();
-}
+}).catch(()=>{});
 
-function applyEvent(ev,live){
-  const ts=new Date(ev.ts||Date.now()).toTimeString().slice(0,8);
-  if(ev.type==='payment'){
-    if(live)pulseFor(ev.from,ev.to,false);
-    vol+=Number(ev.amount)||0;kVol.textContent=vol.toFixed(3)+' ℏ';
-    document.getElementById('topSettled').innerHTML=vol.toFixed(3)+' <span class="subtle">ℏ</span>';
-    if(AGENTS[ev.from])AGENTS[ev.from].spent+=Number(ev.amount)||0;
-    if(AGENTS[ev.to])AGENTS[ev.to].trust=Math.min(100,AGENTS[ev.to].trust+1);
-    cntWindow.push(Date.now());
-    const vb=ev.verified?`<i data-lucide="badge-check" style="width:12px;height:12px;display:inline;color:var(--success)"></i>`:'';
-    const link=ev.hashscan?` <a href="${ev.hashscan}" target="_blank" title="View on HashScan"><i data-lucide="external-link" style="width:12px;height:12px;display:inline"></i></a>`:'';
-    const row=document.createElement('div');row.className='tx';
-    row.innerHTML=`<span class="st ok"></span><span class="flow"><b>${ev.from}</b> → <b>${ev.to}</b> <span class="subtle">${ev.serviceName||ev.service||''}</span> ${vb}${link}</span><span class="amt pos mono">+${Number(ev.amount).toFixed(4)}</span><span class="ts">${ts}</span>`;
-    feed.prepend(row);
-    addReceipt(ev);
-  } else if(ev.type==='blocked'){
-    if(live)pulseFor(ev.from,ev.to,true);
-    blockedCount++;
-    const row=document.createElement('div');row.className='tx';
-    row.innerHTML=`<span class="st block"></span><span class="flow"><b>${ev.from}</b> → <b>${ev.to}</b> <span style="color:var(--danger)">blocked (cap)</span></span><span class="amt neg mono">—</span><span class="ts">${ts}</span>`;
-    feed.prepend(row);
-  } else return;
-  while(feed.children.length>40)feed.lastChild.remove();
-  cntWindow=cntWindow.filter(t=>Date.now()-t<60000);
-  kTx.textContent=cntWindow.length;
-  const used=Math.max(0,...ORDER.map(s=>AGENTS[s].spent/AGENTS[s].capHbar));
-  kBud.textContent=Math.min(100,Math.round(used*100))+'%';
-  renderGuardrail();
-  lucide.createIcons();
-}
-
-function ingestSnapshot(d){
-  if(d.agents){AGENTS={};ORDER=[];for(const a of d.agents){AGENTS[a.symbol]={...a};ORDER.push(a.symbol);}buildGraph(ORDER);renderAgents();}
-  if(d.topicId){topicId=d.topicId;const l=document.getElementById('topicLink');l.href=`https://hashscan.io/${NET}/topic/${topicId}`;}
-  // Reset counters, replay recent history (not as live pulses).
-  vol=0;blockedCount=0;cntWindow=[];feed.innerHTML='';receipts.innerHTML='';
-  (d.recent||[]).forEach(ev=>applyEvent(ev,false));
-  renderGuardrail();
-}
+// chat over websocket
+const msgs=document.getElementById('msgs'), spend=document.getElementById('spend'), inp=document.getElementById('inp'), sendBtn=document.getElementById('sendBtn');
+let used=0, ws=null, curBubble=null, curCard=null, busy=false;
 
 function connect(){
   const proto=location.protocol==='https:'?'wss':'ws';
-  const ws=new WebSocket(`${proto}://${location.host}/ws`);
-  ws.onmessage=(m)=>{const d=JSON.parse(m.data);
-    if(d.type==='snapshot')ingestSnapshot(d);
-    else if(d.type==='event')applyEvent(d.event,true);
-  };
+  ws=new WebSocket(`${proto}://${location.host}/ws`);
+  ws.onmessage=(m)=>{ let d; try{d=JSON.parse(m.data);}catch(_){return;} handle(d); };
   ws.onclose=()=>setTimeout(connect,2000);
   ws.onerror=()=>ws.close();
 }
 connect();
+
+function scroll(){msgs.scrollTop=msgs.scrollHeight;}
+function userMsg(t){const d=document.createElement('div');d.className='m user';d.innerHTML=`<div class="av">${(s?s.account:'').replace(/\D/g,'').slice(-2)||'ME'}</div><div class="bubble"></div>`;d.querySelector('.bubble').textContent=t;msgs.appendChild(d);scroll();}
+function botBubble(){const d=document.createElement('div');d.className='m bot';d.innerHTML=`<div class="av">GW</div><div class="bubble"><div class="plan"><span class="dots"><i></i><i></i><i></i></span> thinking…</div></div>`;msgs.appendChild(d);scroll();return d.querySelector('.bubble');}
+
+function addSpend(name,amt,link){
+  if(spend.querySelector('.empty'))spend.innerHTML='';
+  const d=document.createElement('div');d.className='sp';
+  d.innerHTML=`<span class="st"></span><span class="f"><b>${name.replace('_',' ')}</b></span><a class="a mono" href="${link}" target="_blank">+${amt}</a>`;
+  spend.prepend(d);
+  used+=parseFloat(amt);document.getElementById('budTxt').textContent=used.toFixed(3)+' ℏ';document.getElementById('budBar').style.width=Math.min(100,used/1*100)+'%';
+}
+
+function handle(d){
+  if(d.type==='snapshot')return;
+  if(d.type==='chat-step'){
+    const meta=META[d.tool]||{};
+    if(d.phase==='start'){
+      const c=document.createElement('div');c.className='step';
+      c.innerHTML=`<div class="row"><div class="ic"><i data-lucide="${ICONS[d.tool]||'wrench'}"></i></div>
+        <div><div class="t" style="text-transform:capitalize">${d.tool.replace('_',' ')}</div><div class="d subtle" style="font-size:12px">${meta.description||''}</div></div>
+        <div class="price">${d.price} ℏ</div></div>
+        <div class="paid"><span class="dots"><i></i><i></i><i></i></span> <span class="muted" style="font-size:12px">paying on Hedera…</span></div>`;
+      const plan=curBubble.querySelector('.plan'); if(plan)plan.textContent='';
+      curBubble.appendChild(c);curCard=c;lucide.createIcons();scroll();
+    } else if(d.phase==='paid' && curCard){
+      curCard.querySelector('.paid').innerHTML=`<span class="chk"><i data-lucide="check-circle" style="width:14px;height:14px"></i>Paid ${d.price} ℏ</span><a href="${d.hashscan}" target="_blank">HashScan <i data-lucide="external-link" style="width:12px;height:12px"></i></a>`;
+      lucide.createIcons();scroll();addSpend(d.tool,d.price,d.hashscan);
+    } else if(d.phase==='error' && curCard){
+      curCard.querySelector('.paid').innerHTML=`<span style="color:var(--danger);font-size:12px">payment error</span>`;scroll();
+    }
+  } else if(d.type==='chat-final'){
+    const plan=curBubble.querySelector('.plan'); if(plan)plan.remove();
+    const t=document.createElement('div');t.style.whiteSpace='pre-wrap';t.textContent=d.content||'(no answer)';curBubble.appendChild(t);
+    done();scroll();
+  } else if(d.type==='chat-error'){
+    const plan=curBubble.querySelector('.plan'); if(plan)plan.textContent='';
+    const t=document.createElement('div');t.style.color='var(--danger)';t.style.fontSize='13px';t.textContent='Error: '+(d.message||'something went wrong');curBubble.appendChild(t);done();
+  }
+}
+
+function done(){busy=false;sendBtn.disabled=false;inp.disabled=false;curCard=null;inp.focus();}
+function quick(el){inp.value=el.textContent;send();}
+function send(){
+  const v=inp.value.trim(); if(!v||busy)return;
+  if(!ws||ws.readyState!==1){return;}
+  document.getElementById('suggest').style.display='none';
+  inp.value='';busy=true;sendBtn.disabled=true;inp.disabled=true;
+  userMsg(v);
+  curBubble=botBubble();
+  ws.send(JSON.stringify({type:'chat',text:v}));
+}
 </script>
 </body>
 </html>
