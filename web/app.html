@@ -156,7 +156,8 @@ button{font-family:inherit}
 .sp .a{font-family:var(--font-mono);color:var(--success)}
 
 /* market + mcp */
-.pane{overflow-y:auto;padding:32px}
+.pane{overflow-y:auto;padding:40px 32px;display:flex;justify-content:center}
+.panein{width:100%;max-width:1060px}
 .pane h1{font-size:24px;font-weight:700;letter-spacing:-.5px;margin-bottom:4px}
 .pane .sub{color:var(--fg-muted);margin-bottom:26px;font-size:14px;max-width:640px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;max-width:960px}
@@ -170,12 +171,12 @@ button{font-family:inherit}
 .svc .p{font-family:var(--font-mono);font-size:14px;color:var(--value)}
 .svc .by{font-size:11px;color:var(--fg-subtle);font-family:var(--font-mono)}
 /* agent roster */
-.commander{display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,var(--surface-2),var(--surface));border:1px solid var(--border-2);border-radius:16px;padding:18px 20px;margin-bottom:24px;max-width:960px}
+.commander{display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,var(--surface-2),var(--surface));border:1px solid var(--border-2);border-radius:16px;padding:18px 20px;margin-bottom:24px}
 .commander .cav{width:52px;height:52px;border-radius:14px;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px -6px var(--agent);flex-shrink:0}
 .commander .cav svg{width:26px;height:26px;color:#04120E}
 .commander .cname{font-size:16px;font-weight:700}
 .commander .cdesc{font-size:13px;color:var(--fg-muted);margin-top:2px}
-.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;max-width:960px}
+.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
 .agentcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;transition:160ms;display:flex;flex-direction:column}
 .agentcard:hover{border-color:var(--border-2);transform:translateY(-2px)}
 .ahead{display:flex;align-items:center;gap:12px;margin-bottom:12px}
@@ -251,20 +252,20 @@ button{font-family:inherit}
 
     <!-- MARKETPLACE -->
     <section class="view" id="v-market">
-      <div class="pane">
+      <div class="pane"><div class="panein">
         <h1>The agent team</h1>
         <div class="sub">Wire commands a team of specialist agents. Each has its own Hedera account and charges per task — Wire hires and pays them on-chain over x402 as your requests come in.</div>
         <div class="commander">
-          <div class="cav"><img src="https://api.dicebear.com/9.x/bottts/svg?seed=Wire%20the%20Commander&radius=25&backgroundColor=22C55E" alt="Wire"></div>
+          <div class="cav"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Wire%20the%20Commander&radius=25&backgroundColor=22C55E" alt="Wire"></div>
           <div><div class="cname">Wire · Commander</div><div class="cdesc">Coordinates the team and pays each specialist per task, autonomously.</div></div>
         </div>
         <div class="roster" id="grid"><div class="emptyr">Loading team…</div></div>
-      </div>
+      </div></div>
     </section>
 
     <!-- MCP -->
     <section class="view" id="v-mcp">
-      <div class="pane">
+      <div class="pane"><div class="panein">
         <h1>Connect any AI agent (MCP)</h1>
         <div class="sub">Ghostwire exposes its marketplace as an MCP server. Any MCP client — Claude Desktop, Cursor, or your own agent — can discover these tools and pay for them autonomously via x402 on Hedera.</div>
         <div class="code"><span class="c">// Add Ghostwire to your MCP client config</span>
@@ -278,7 +279,7 @@ button{font-family:inherit}
   }
 }</div>
         <p class="subtle" style="margin-top:16px;font-size:13px;max-width:720px"><span style="color:var(--success)">● Live</span> — the same agents Wire uses are exposed at <span class="mono">/mcp</span>. Every tool call an external agent makes settles a real payment on Hedera.</p>
-      </div>
+      </div></div>
     </section>
   </div>
 </div>
@@ -289,7 +290,8 @@ if(!s){ location.replace('index.html'); }
 lucide.createIcons();
 function shortAddr(a){ return a && a.startsWith('0x') && a.length>10 ? a.slice(0,6)+'…'+a.slice(-4) : a; }
 function shortAv(a){ return a ? (a.startsWith('0x') ? a.slice(2,4) : a.replace(/\D/g,'').slice(-2)).toUpperCase() : 'ME'; }
-function avatar(name,accent){ const bg=(accent||'#1B2438').replace('#',''); return `https://api.dicebear.com/9.x/bottts/svg?seed=${encodeURIComponent(name||'agent')}&radius=25&backgroundColor=${bg}`; }
+const AV_STYLE='notionists';
+function avatar(name,accent){ const bg=(accent||'#1B2438').replace('#',''); return `https://api.dicebear.com/9.x/${AV_STYLE}/svg?seed=${encodeURIComponent(name||'agent')}&radius=25&backgroundColor=${bg}`; }
 const WIRE_AV=avatar('Wire the Commander','22C55E');
 if(s){ const av=document.getElementById('acctAv'); av.innerHTML=`<img src="${avatar(s.account,'F59E0B')}" alt="">`; av.title=s.account; }
 function logout(){ localStorage.removeItem('ghostwire.session'); location.href='index.html'; }
