@@ -60,8 +60,16 @@ app.get("/api/service/:id", async (req, res) => {
   res.json({ service: svc.id, delivered: true, result: `Result of ${svc.name}`, settledAt: v.consensusAt });
 });
 
-// --- static web app ---
-app.use(express.static(path.resolve(__dirname, "../web")));
+// --- static web app (never cache HTML so deploys show immediately) ---
+app.use(
+  express.static(path.resolve(__dirname, "../web"), {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith(".html")) {
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      }
+    },
+  }),
+);
 
 // --- websocket live feed ---
 const server = http.createServer(app);

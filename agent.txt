@@ -1,0 +1,32 @@
+
+Commander
+Supreme orchestrator coordinating all agents and strategic decisions
+
+Eagleton Skywatcher
+Navigator
+Market intelligence specialist tracking real-time prices across 15,000+ tokens
+
+Athena Nightwing
+Archivist
+Sentiment analysis expert aggregating news and detecting market-moving events
+
+Reynard Swift
+Merchant
+DEX executor monitoring signals and swapping HBAR/SAUCE on SaucerSwap
+
+Ursus Guardian
+Sentinel
+Risk manager calculating volatility and protecting capital with stop-loss triggers
+
+Luna Mysticfang
+Oracle
+Technical analyst using AI for chart patterns and trading signal generation
+
+Corvus Messenger
+Glitch
+Alert system detecting breaking news, whale movements, and instant notifications
+
+Ready to Deploy?
+Experience autonomous AI agents on Hedera Hashgraph
+
+Launch App Now
