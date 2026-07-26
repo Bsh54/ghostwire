@@ -4,6 +4,7 @@ import { chatCompletion } from "./llm.js";
 import { TOOLS, TOOL_DEFS } from "./tools.js";
 import { payFrom } from "./pay.js";
 import { emitEvent } from "./bus.js";
+import { canSpend, record } from "./budget.js";
 
 const SYSTEM = `You are Wire, the Commander of Ghostwire — sharp, friendly and to the point.
 You lead a team of specialist agents you can hire: Eagleton Skywatcher (live prices),
@@ -44,6 +45,14 @@ export async function runChat(userText, emit, agent, history = []) {
 
         emit({ type: "chat-step", phase: "start", tool: name, price: tool.price });
 
+        // Guardrail: enforce the user's session budget cap before any money moves.
+        if (!canSpend(agent.user, tool.price)) {
+          emit({ type: "chat-step", phase: "blocked", tool: name, price: tool.price, reason: "session budget cap reached" });
+          steps.push({ tool: name, price: tool.price, status: "blocked" });
+          messages.push({ role: "tool", tool_call_id: tc.id, content: "payment blocked: the user's session budget cap was reached. Tell the user to raise the cap to continue." });
+          continue;
+        }
+
         // Settle the real on-chain payment from the user's own agent account.
         let pay;
         try {
@@ -55,6 +64,7 @@ export async function runChat(userText, emit, agent, history = []) {
           messages.push({ role: "tool", tool_call_id: tc.id, content: funds ? "payment declined: the agent has no funds left" : "payment failed" });
           continue;
         }
+        record(agent.user, tool.price);
         emit({ type: "chat-step", phase: "paid", tool: name, price: tool.price, hashscan: pay.hashscan, txId: pay.txId, from: agent.accountId });
         steps.push({ tool: name, price: tool.price, hashscan: pay.hashscan, status: "paid" });
         emitEvent({ type: "payment", from: agent.accountId, to: name, amount: tool.price, hashscan: pay.hashscan, service: name });

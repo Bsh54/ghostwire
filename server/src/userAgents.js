@@ -8,6 +8,7 @@ import {
   Hbar,
   Client,
   AccountId,
+  AccountBalanceQuery,
 } from "@hashgraph/sdk";
 import { getClient, NETWORK } from "./hedera.js";
 import fs from "fs";
@@ -41,6 +42,16 @@ export async function getOrCreateUserAgent(userId) {
     created = true;
   }
   return { ...store[id], created };
+}
+
+// Current on-chain balance (in HBAR) of an agent account.
+export async function getBalance(accountId) {
+  try {
+    const bal = await new AccountBalanceQuery().setAccountId(accountId).execute(operator);
+    return Number(bal.hbars.toBigNumber());
+  } catch (_) {
+    return null;
+  }
 }
 
 // A signing client operated by the user's own agent account.

@@ -11,8 +11,9 @@ import { bus, recentEvents } from "./src/bus.js";
 import { agentList, topic } from "./src/agents.js";
 import { runChat } from "./src/chat.js";
 import { TOOLS } from "./src/tools.js";
-import { getOrCreateUserAgent, userClient } from "./src/userAgents.js";
+import { getOrCreateUserAgent, userClient, getBalance } from "./src/userAgents.js";
 import * as store from "./src/store.js";
+import { getBudget, setCap } from "./src/budget.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3005;
@@ -23,6 +24,18 @@ app.use(express.json());
 // --- API ---
 app.get("/api/state", (_req, res) => {
   res.json({ agents: agentList(), services: SERVICES, topicId: topic(), recent: recentEvents() });
+});
+
+// A user's agent: on-chain balance + session budget guardrail.
+app.get("/api/agent", async (req, res) => {
+  const rec = await getOrCreateUserAgent(req.query.user);
+  const balance = await getBalance(rec.accountId);
+  const b = getBudget(req.query.user);
+  res.json({ accountId: rec.accountId, balance, cap: b.cap, spent: b.spent });
+});
+app.post("/api/budget", (req, res) => {
+  const b = setCap(req.body.user, req.body.cap);
+  res.json({ cap: b.cap, spent: b.spent });
 });
 
 // Conversations (server-stored chat history, per user).
@@ -102,7 +115,7 @@ wss.on("connection", (ws) => {
         const client = userClient(record);
         emit({ type: "agent-info", accountId: record.accountId, created: record.created });
         const history = conv.messages.slice(-10);
-        const result = await runChat(text, emit, { client, accountId: record.accountId }, history);
+        const result = await runChat(text, emit, { client, accountId: record.accountId, user: data.user }, history);
         store.appendTurn(conv.id, { role: "user", content: text }, { role: "assistant", content: result.content, steps: result.steps });
       } catch (e) {
         emit({ type: "chat-error", message: String(e.message || e) });
