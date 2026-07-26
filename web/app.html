@@ -161,6 +161,27 @@ button{font-family:inherit}
 .svc .foot{display:flex;align-items:center;justify-content:space-between}
 .svc .p{font-family:var(--font-mono);font-size:14px;color:var(--value)}
 .svc .by{font-size:11px;color:var(--fg-subtle);font-family:var(--font-mono)}
+/* agent roster */
+.commander{display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,var(--surface-2),var(--surface));border:1px solid var(--border-2);border-radius:16px;padding:18px 20px;margin-bottom:24px;max-width:960px}
+.commander .cav{width:52px;height:52px;border-radius:14px;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px -6px var(--agent);flex-shrink:0}
+.commander .cav svg{width:26px;height:26px;color:#04120E}
+.commander .cname{font-size:16px;font-weight:700}
+.commander .cdesc{font-size:13px;color:var(--fg-muted);margin-top:2px}
+.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;max-width:960px}
+.agentcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;transition:160ms;display:flex;flex-direction:column}
+.agentcard:hover{border-color:var(--border-2);transform:translateY(-2px)}
+.ahead{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.aav{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.aav svg{width:23px;height:23px;color:#04120E}
+.aname{font-size:15px;font-weight:700}
+.arole{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+.ablurb{font-size:13.5px;color:var(--fg-muted);margin-bottom:12px;flex:1}
+.acap{font-size:12px;color:var(--fg-subtle);display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--surface-2);border-radius:8px;margin-bottom:12px}
+.acap svg{color:var(--fg-subtle);flex-shrink:0}
+.afoot{display:flex;align-items:center;justify-content:space-between}
+.afoot .p{font-family:var(--font-mono);font-size:13px;color:var(--value);font-weight:500}
+.afoot .by{font-family:var(--font-mono);font-size:11px;color:var(--fg-subtle)}
+.afoot .by:hover{color:var(--agent)}
 .code{background:#060B16;border:1px solid var(--border);border-radius:12px;padding:18px;font-family:var(--font-mono);font-size:13px;color:#CBD5E1;white-space:pre;overflow-x:auto;max-width:720px}
 .code .k{color:var(--agent)}.code .s{color:var(--success)}.code .c{color:var(--fg-subtle)}
 
@@ -221,9 +242,13 @@ button{font-family:inherit}
     <!-- MARKETPLACE -->
     <section class="view" id="v-market">
       <div class="pane">
-        <h1>Service marketplace</h1>
-        <div class="sub">Pay-per-call AI services, settled in HBAR over x402 on Hedera. Wire hires these automatically to complete your tasks.</div>
-        <div class="grid" id="grid"><div class="emptyr">Loading…</div></div>
+        <h1>The agent team</h1>
+        <div class="sub">Wire commands a team of specialist agents. Each has its own Hedera account and charges per task — Wire hires and pays them on-chain over x402 as your requests come in.</div>
+        <div class="commander">
+          <div class="cav"><i data-lucide="crown"></i></div>
+          <div><div class="cname">Wire · Commander</div><div class="cdesc">Coordinates the team and pays each specialist per task, autonomously.</div></div>
+        </div>
+        <div class="roster" id="grid"><div class="emptyr">Loading team…</div></div>
       </div>
     </section>
 
@@ -257,7 +282,7 @@ function shortAv(a){ return a ? (a.startsWith('0x') ? a.slice(2,4) : a.replace(/
 if(s){ const av=document.getElementById('acctAv'); av.textContent=shortAv(s.account); av.title=s.account; }
 function logout(){ localStorage.removeItem('ghostwire.session'); location.href='index.html'; }
 
-const ICONS={summarize:'file-text',translate:'languages',factcheck:'badge-check',web_fetch:'globe'};
+const ICONS={market_price:'radar',summarize:'scroll-text',analyze:'line-chart',risk_check:'shield',web_scout:'radio'};
 const META={};
 const msgs=document.getElementById('msgs'), convsEl=document.getElementById('convs'), spend=document.getElementById('spend');
 const inp=document.getElementById('inp'), sendBtn=document.getElementById('sendBtn');
@@ -334,10 +359,10 @@ function showWelcome(){
     <h1>Hey, I'm Wire.</h1>
     <p>Give me a task — I'll hire and pay the services I need, for real, on Hedera.</p>
     <div class="cards">
-      <div class="qc" onclick="quick('Translate to French: our revenue grew 12% this quarter')"><div class="qt"><i data-lucide="languages"></i>Translate</div><div class="qd">Turn a sentence into French, paid on-chain</div></div>
-      <div class="qc" onclick="quick('Fact-check: the EUR/USD rate is above 1.05')"><div class="qt"><i data-lucide="badge-check"></i>Fact-check</div><div class="qd">Verify a claim against real reasoning</div></div>
-      <div class="qc" onclick="quick('Summarize: x402 lets AI agents pay per request over HTTP 402, settling stablecoins so software can buy APIs without accounts or keys.')"><div class="qt"><i data-lucide="file-text"></i>Summarize</div><div class="qd">Condense a paragraph to key points</div></div>
-      <div class="qc" onclick="quick('Fetch https://hedera.com and tell me what it is')"><div class="qt"><i data-lucide="globe"></i>Web fetch</div><div class="qd">Read a live page and explain it</div></div>
+      <div class="qc" onclick="quick('What is the current price of HBAR?')"><div class="qt"><i data-lucide="radar"></i>Live price</div><div class="qd">Eagleton fetches HBAR's price &amp; 24h move</div></div>
+      <div class="qc" onclick="quick('Assess the risk of holding Bitcoin right now')"><div class="qt"><i data-lucide="shield"></i>Risk check</div><div class="qd">Ursus weighs volatility and downside</div></div>
+      <div class="qc" onclick="quick('Summarize: x402 lets AI agents pay per request over HTTP 402, settling stablecoins so software can buy APIs without accounts or keys.')"><div class="qt"><i data-lucide="scroll-text"></i>Summarize</div><div class="qd">Athena condenses text to key points</div></div>
+      <div class="qc" onclick="quick('Fetch https://hedera.com and tell me what it is')"><div class="qt"><i data-lucide="radio"></i>Web scout</div><div class="qd">Corvus reads a live page and explains it</div></div>
     </div></div>`;
   lucide.createIcons();
 }
@@ -356,11 +381,12 @@ function addBot(content, steps){
   lucide.createIcons();scroll(); return d;
 }
 function renderStep(step, finished){
-  const meta=META[step.tool]||{}; const c=document.createElement('div');c.className='step';
-  c.innerHTML=`<div class="r"><div class="si"><i data-lucide="${ICONS[step.tool]||'wrench'}"></i></div>
-    <div><div class="st">${step.tool.replace('_',' ')}</div><div class="sd">${meta.description||''}</div></div>
+  const meta=META[step.tool]||{}; const p=meta.persona||{}; const ac=p.accent;
+  const c=document.createElement('div');c.className='step';
+  c.innerHTML=`<div class="r"><div class="si" ${ac?`style="background:${ac}22"`:''}><i data-lucide="${p.icon||ICONS[step.tool]||'wrench'}" ${ac?`style="color:${ac}"`:''}></i></div>
+    <div><div class="st">${p.name||step.tool.replace('_',' ')}</div><div class="sd">${p.role?p.role+' · ':''}${meta.description||''}</div></div>
     <div class="pr">${step.price} ℏ</div></div>
-    <div class="paid">${finished?paidHtml(step):`<span class="think"><span class="dots"><i></i><i></i><i></i></span> paying on Hedera…</span>`}</div>`;
+    <div class="paid">${finished?paidHtml(step):`<span class="think"><span class="dots"><i></i><i></i><i></i></span> hiring &amp; paying on Hedera…</span>`}</div>`;
   return c;
 }
 function paidHtml(step){
@@ -376,8 +402,9 @@ function scroll(){ if(stick){ msgs.scrollTop=msgs.scrollHeight; } syncBtn(); }
 function scrollForce(){ stick=true; msgs.scrollTop=msgs.scrollHeight; syncBtn(); lucide.createIcons(); }
 function addSpend(tool,amt,link){
   if(spend.querySelector('.emptyr'))spend.innerHTML='';
+  const p=(META[tool]||{}).persona||{};
   const d=document.createElement('div');d.className='sp';
-  d.innerHTML=`<span class="d"></span><span class="f"><b>${tool.replace('_',' ')}</b></span><a class="a" href="${link}" target="_blank">+${amt}</a>`;
+  d.innerHTML=`<span class="d"></span><span class="f"><b>${p.name||tool.replace('_',' ')}</b></span><a class="a" href="${link}" target="_blank">+${amt}</a>`;
   spend.prepend(d);
   used+=parseFloat(amt);document.getElementById('budTxt').textContent=used.toFixed(3)+' ℏ';document.getElementById('budBar').style.width=Math.min(100,used*100)+'%';
 }
@@ -426,10 +453,18 @@ function send(){
 /* init */
 fetch('/api/tools').then(r=>r.json()).then(tools=>{
   tools.forEach(t=>META[t.name]=t);
-  document.getElementById('grid').innerHTML=tools.map(t=>`
-    <div class="svc"><div class="si"><i data-lucide="${ICONS[t.name]||'wrench'}"></i></div>
-    <h3>${t.name.replace('_',' ')}</h3><p>${t.description}</p>
-    <div class="foot"><span class="p">${t.price} ℏ</span><span class="by">by ${shortAddr(t.provider||'')}</span></div></div>`).join('');
+  document.getElementById('grid').innerHTML=tools.map(t=>{
+    const p=t.persona||{}; const ac=p.accent||'#2DD4BF';
+    return `<div class="agentcard">
+      <div class="ahead">
+        <div class="aav" style="background:linear-gradient(135deg,${ac},${ac}99);box-shadow:0 0 24px -8px ${ac}"><i data-lucide="${p.icon||'wrench'}"></i></div>
+        <div><div class="aname">${p.name||t.name}</div><div class="arole" style="color:${ac}">${p.role||'Agent'}</div></div>
+      </div>
+      <div class="ablurb">${p.blurb||t.description}</div>
+      <div class="acap"><i data-lucide="wrench" style="width:13px;height:13px"></i>${t.description}</div>
+      <div class="afoot"><span class="p">${t.price} ℏ / task</span><a class="by" href="https://hashscan.io/testnet/account/${t.provider}" target="_blank">${shortAddr(t.provider||'')}</a></div>
+    </div>`;
+  }).join('');
   lucide.createIcons();
 }).catch(()=>{});
 loadConvs();

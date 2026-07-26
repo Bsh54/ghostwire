@@ -42,6 +42,7 @@ app.get("/api/tools", (_req, res) => {
       price: t.price,
       provider: t.provider,
       description: t.def.function.description,
+      persona: t.persona,
     })),
   );
 });
