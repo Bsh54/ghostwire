@@ -30,14 +30,12 @@ button{font-family:inherit}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;min-width:160px}
 .mark{width:30px;height:30px;border-radius:9px;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:0 0 18px -4px var(--agent)}
 .mark svg{width:17px;height:17px;color:#04120E}
-.tabs{flex:1;display:flex;justify-content:center;gap:8px}
-.tab{position:relative;width:88px;height:46px;border-radius:10px;border:none;background:none;color:var(--fg-subtle);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:140ms}
-.tab:hover{background:var(--surface-2);color:var(--fg-muted)}
-.tab svg{width:23px;height:23px}
+.tabs{flex:1;display:flex;justify-content:center;gap:6px}
+.tab{position:relative;height:46px;padding:0 18px;border-radius:10px;border:none;background:none;color:var(--fg-muted);cursor:pointer;display:flex;align-items:center;gap:9px;font-size:14px;font-weight:600;transition:140ms}
+.tab:hover{background:var(--surface-2);color:var(--fg)}
+.tab svg{width:20px;height:20px}
 .tab.active{color:var(--agent)}
-.tab.active::after{content:"";position:absolute;left:16px;right:16px;bottom:-8px;height:3px;border-radius:3px;background:var(--agent)}
-.tab .tip{position:absolute;top:52px;background:var(--surface-3);color:var(--fg);font-size:11px;font-weight:500;padding:4px 8px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:120ms;border:1px solid var(--border-2)}
-.tab:hover .tip{opacity:1}
+.tab.active::after{content:"";position:absolute;left:14px;right:14px;bottom:-8px;height:3px;border-radius:3px;background:var(--agent)}
 .rightnav{display:flex;align-items:center;gap:10px;min-width:160px;justify-content:flex-end}
 .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:5px 10px;border-radius:7px;border:1px solid var(--border-2)}
 .chip.net{color:var(--agent);border-color:var(--agent)}
@@ -52,7 +50,7 @@ button{font-family:inherit}
 /* ===== content ===== */
 .content{flex:1;min-height:0;position:relative}
 .view{position:absolute;inset:0;display:none}
-.view.on{display:grid}
+.view.on{display:grid;grid-template-rows:minmax(0,1fr)}
 #v-chat.on{grid-template-columns:250px 1fr 290px}
 #v-market.on,#v-mcp.on{grid-template-columns:1fr}
 
@@ -74,8 +72,11 @@ button{font-family:inherit}
 .emptyr{padding:20px 16px;text-align:center;color:var(--fg-subtle);font-size:12.5px}
 
 /* chat column */
-.chatcol{display:flex;flex-direction:column;min-width:0}
-.msgs{flex:1;overflow-y:auto;padding:24px 0}
+.chatcol{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
+.msgs{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:24px 0}
+.tobottom{position:absolute;left:50%;transform:translateX(-50%);bottom:110px;width:38px;height:38px;border-radius:50%;border:1px solid var(--border-2);background:var(--surface-3);color:var(--fg);cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 6px 20px -6px rgba(0,0,0,.7);z-index:5;transition:140ms}
+.tobottom:hover{background:var(--surface-2);border-color:var(--agent)}
+.tobottom svg{width:18px;height:18px}
 .welcome{max-width:760px;margin:6vh auto 0;padding:0 28px;text-align:center}
 .welcome .hi{width:60px;height:60px;border-radius:16px;background:var(--grad);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;box-shadow:0 0 40px -8px var(--agent)}
 .welcome .hi svg{width:30px;height:30px;color:#04120E}
@@ -139,7 +140,7 @@ button{font-family:inherit}
 .bud{padding:14px 16px;border-bottom:1px solid var(--border)}
 .bar{height:7px;background:var(--surface-3);border-radius:4px;overflow:hidden;margin-top:8px}
 .bar>i{display:block;height:100%;background:var(--grad);border-radius:4px;transition:width .4s}
-.spend{flex:1;overflow-y:auto;padding:8px}
+.spend{flex:1;min-height:0;overflow-y:auto;padding:8px}
 .sp{display:flex;align-items:center;gap:9px;padding:9px 8px;border-radius:7px;font-size:12.5px}
 .sp:hover{background:var(--surface-2)}
 .sp .d{width:7px;height:7px;border-radius:50%;background:var(--success);flex-shrink:0}
@@ -176,9 +177,9 @@ button{font-family:inherit}
   <header class="topnav">
     <div class="brand"><div class="mark"><i data-lucide="zap"></i></div><span>Ghostwire</span></div>
     <nav class="tabs">
-      <button class="tab active" data-v="chat"><i data-lucide="message-square"></i><span class="tip">Assistant</span></button>
-      <button class="tab" data-v="market"><i data-lucide="store"></i><span class="tip">Marketplace</span></button>
-      <button class="tab" data-v="mcp"><i data-lucide="plug"></i><span class="tip">Connect (MCP)</span></button>
+      <button class="tab active" data-v="chat"><i data-lucide="message-square"></i><span>Assistant</span></button>
+      <button class="tab" data-v="market"><i data-lucide="store"></i><span>Marketplace</span></button>
+      <button class="tab" data-v="mcp"><i data-lucide="plug"></i><span>Connect</span></button>
     </nav>
     <div class="rightnav">
       <span class="chip net"><span class="live"></span>Testnet</span>
@@ -198,6 +199,7 @@ button{font-family:inherit}
       </aside>
       <div class="chatcol">
         <div class="msgs" id="msgs"></div>
+        <button class="tobottom" id="toBottom" onclick="scrollForce()" aria-label="Scroll to latest"><i data-lucide="arrow-down"></i></button>
         <div class="composer">
           <div class="cbox">
             <div class="field"><textarea id="inp" rows="1" placeholder="Ask Wire to do something…" oninput="autg(this)" onkeydown="keyd(event)"></textarea></div>
@@ -366,9 +368,12 @@ function paidHtml(step){
   return `<span class="ok"><i data-lucide="check-circle" style="width:14px;height:14px"></i>Paid ${step.price} ℏ</span>${step.hashscan?`<a href="${step.hashscan}" target="_blank">HashScan <i data-lucide="external-link" style="width:12px;height:12px"></i></a>`:''}`;
 }
 let stick=true;
-msgs.addEventListener('scroll',()=>{ stick=(msgs.scrollHeight-msgs.scrollTop-msgs.clientHeight)<140; });
-function scroll(){ if(stick) msgs.scrollTop=msgs.scrollHeight; }
-function scrollForce(){ stick=true; msgs.scrollTop=msgs.scrollHeight; }
+const toBottom=document.getElementById('toBottom');
+function atBottom(){ return (msgs.scrollHeight-msgs.scrollTop-msgs.clientHeight)<120; }
+function syncBtn(){ if(toBottom) toBottom.style.display = stick ? 'none' : 'flex'; }
+msgs.addEventListener('scroll',()=>{ stick=atBottom(); syncBtn(); });
+function scroll(){ if(stick){ msgs.scrollTop=msgs.scrollHeight; } syncBtn(); }
+function scrollForce(){ stick=true; msgs.scrollTop=msgs.scrollHeight; syncBtn(); lucide.createIcons(); }
 function addSpend(tool,amt,link){
   if(spend.querySelector('.emptyr'))spend.innerHTML='';
   const d=document.createElement('div');d.className='sp';
