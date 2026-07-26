@@ -136,14 +136,12 @@ footer .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 
 <header class="hero"><div class="wrap hero-grid">
   <div>
-    <div class="pill"><span class="dot"></span>Live on Hedera</div>
-    <h1>Meet <span class="g">Wire</span> — the AI that <span class="g">hires expert agents</span> to get real answers.</h1>
-    <p class="sub">Wire commands a team of specialist agents — market scanners, on-chain sleuths, researchers. It hires the right one for your task and pays it per job, on Hedera. Real data, real payments, real answers.</p>
+    <h1>Meet <span class="g">Wire</span> — your AI that <span class="g">hires expert agents.</span></h1>
+    <p class="sub">Ask in plain language. Wire hires the right specialist for the job and pays it on Hedera — real data, real answers.</p>
     <div class="cta">
       <button class="btn btn-p" onclick="openWallet()"><i data-lucide="wallet"></i>Connect wallet to start</button>
       <a href="#how" class="btn btn-g"><i data-lucide="play"></i>How it works</a>
     </div>
-    <div class="trust"><span><b>Powered by</b></span><span>Hedera</span><span class="sepdot"></span><span>x402 payments</span><span class="sepdot"></span><span>DeepSeek</span></div>
   </div>
 
   <div class="chatcard">
@@ -163,7 +161,14 @@ footer .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
   <div class="ey" style="text-align:center">The team</div>
   <h2>Six specialist agents, on call</h2>
   <p class="lead">Each agent does something an AI can't do on its own — live market data, on-chain intelligence, real research. Wire hires and pays them per task.</p>
-  <div class="team" id="team"></div>
+  <div class="team">
+    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Eagleton%20Skywatcher&radius=25&backgroundColor=2DD4BF"></div><div><div class="nm">Eagleton Skywatcher</div><div class="rl" style="color:#2DD4BF">Navigator</div></div></div><p>Scans any token's real liquidity, volume and red flags.</p></div>
+    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Luna%20Mysticfang&radius=25&backgroundColor=F59E0B"></div><div><div class="nm">Luna Mysticfang</div><div class="rl" style="color:#F59E0B">Oracle</div></div></div><p>Reads the live market mood: Fear &amp; Greed plus what's trending.</p></div>
+    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Ursus%20Guardian&radius=25&backgroundColor=22C55E"></div><div><div class="nm">Ursus Guardian</div><div class="rl" style="color:#22C55E">Sentinel</div></div></div><p>Profiles any Hedera account: balance, tokens and activity.</p></div>
+    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Reynard%20Swift&radius=25&backgroundColor=EAB308"></div><div><div class="nm">Reynard Swift</div><div class="rl" style="color:#EAB308">Merchant</div></div></div><p>Quotes live token prices on SaucerSwap, Hedera's native DEX.</p></div>
+    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Corvus%20Messenger&radius=25&backgroundColor=FB923C"></div><div><div class="nm">Corvus Messenger</div><div class="rl" style="color:#FB923C">Glitch</div></div></div><p>Pulls multiple live sources on a topic for a grounded brief.</p></div>
+    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Athena%20Nightwing&radius=25&backgroundColor=38BDF8"></div><div><div class="nm">Athena Nightwing</div><div class="rl" style="color:#38BDF8">Archivist</div></div></div><p>Surfaces the largest recent HBAR transfers on the network.</p></div>
+  </div>
 </div></section>
 
 <section class="section" id="how" style="padding-top:0"><div class="wrap">
@@ -205,16 +210,6 @@ footer .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 
 <script>
 lucide.createIcons();
-
-// team from the live registry
-fetch('/api/tools').then(r=>r.json()).then(t=>{
-  const el=document.getElementById('team');
-  el.innerHTML=t.map(a=>{const p=a.persona||{};const ac=p.accent||'#2DD4BF';
-    return `<div class="tcard"><div class="top">
-      <div class="tav"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(p.name||a.name)}&radius=25&backgroundColor=${ac.replace('#','')}"></div>
-      <div><div class="nm">${p.name||a.name}</div><div class="rl" style="color:${ac}">${p.role||'Agent'}</div></div></div>
-      <p>${p.blurb||a.description}</p></div>`;}).join('');
-}).catch(()=>{document.getElementById('team').innerHTML='<p class="muted" style="text-align:center;grid-column:1/-1">Team loads once the service is online.</p>';});
 
 // multi-wallet connect (EIP-6963 → Hedera Testnet)
 const HEDERA={chainId:'0x128',chainName:'Hedera Testnet',nativeCurrency:{name:'HBAR',symbol:'HBAR',decimals:18},rpcUrls:['https://testnet.hashio.io/api'],blockExplorerUrls:['https://hashscan.io/testnet']};
