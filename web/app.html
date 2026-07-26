@@ -110,6 +110,7 @@ a{color:var(--info);text-decoration:none}
   <header class="topbar">
     <div class="logo"><span class="dot"></span>Ghostwire</div>
     <div class="pill"><span class="live"></span>Hedera Testnet</div>
+    <a class="pill" id="agentPill" href="#" target="_blank" style="display:none;border-color:var(--value);color:var(--value)"><i data-lucide="bot" style="width:13px;height:13px"></i><span id="agentId" class="mono"></span></a>
     <div class="spacer"></div>
     <div class="acct"><span class="id" id="acctId">0.0.—</span><div class="avatar" id="acctAv">··</div></div>
   </header>
@@ -239,6 +240,19 @@ function addSpend(name,amt,link){
 
 function handle(d){
   if(d.type==='snapshot')return;
+  if(d.type==='agent-preparing'){
+    const plan=curBubble&&curBubble.querySelector('.plan'); if(plan)plan.innerHTML=`<span class="dots"><i></i><i></i><i></i></span> preparing your agent…`;
+    return;
+  }
+  if(d.type==='agent-info'){
+    const pill=document.getElementById('agentPill');
+    document.getElementById('agentId').textContent=' '+shortAddr(d.accountId);
+    pill.href='https://hashscan.io/testnet/account/'+d.accountId;
+    pill.style.display='inline-flex';
+    if(d.created){ const plan=curBubble&&curBubble.querySelector('.plan'); if(plan)plan.innerHTML=`<span class="dots"><i></i><i></i><i></i></span> your agent <span class="mono">${shortAddr(d.accountId)}</span> is ready, working…`; }
+    lucide.createIcons();
+    return;
+  }
   if(d.type==='chat-step'){
     const meta=META[d.tool]||{};
     if(d.phase==='start'){
@@ -253,7 +267,7 @@ function handle(d){
       curCard.querySelector('.paid').innerHTML=`<span class="chk"><i data-lucide="check-circle" style="width:14px;height:14px"></i>Paid ${d.price} ℏ</span><a href="${d.hashscan}" target="_blank">HashScan <i data-lucide="external-link" style="width:12px;height:12px"></i></a>`;
       lucide.createIcons();scroll();addSpend(d.tool,d.price,d.hashscan);
     } else if(d.phase==='error' && curCard){
-      curCard.querySelector('.paid').innerHTML=`<span style="color:var(--danger);font-size:12px">payment error</span>`;scroll();
+      curCard.querySelector('.paid').innerHTML=`<span style="color:var(--danger);font-size:12px;display:flex;align-items:center;gap:5px"><i data-lucide="shield-x" style="width:13px;height:13px"></i>${d.message||'payment error'}</span>`;lucide.createIcons();scroll();
     }
   } else if(d.type==='chat-final'){
     const plan=curBubble.querySelector('.plan'); if(plan)plan.remove();
@@ -274,7 +288,7 @@ function send(){
   inp.value='';busy=true;sendBtn.disabled=true;inp.disabled=true;
   userMsg(v);
   curBubble=botBubble();
-  ws.send(JSON.stringify({type:'chat',text:v}));
+  ws.send(JSON.stringify({type:'chat',text:v,user:s?s.account:''}));
 }
 </script>
 </body>

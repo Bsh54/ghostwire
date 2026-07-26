@@ -2,16 +2,14 @@
 // settles a real Hedera payment before running, and every step is streamed out.
 import { chatCompletion } from "./llm.js";
 import { TOOLS, TOOL_DEFS } from "./tools.js";
-import { payProvider } from "./pay.js";
+import { payFrom } from "./pay.js";
 import { emitEvent } from "./bus.js";
 
 const SYSTEM = `You are Ghostwire, an assistant that gets things done by hiring paid tools.
 Each tool call costs a tiny HBAR micro-payment, settled automatically on the Hedera network.
 Use tools when they genuinely help; otherwise answer directly. Keep replies concise and clear.`;
 
-const AUTO_APPROVE_LIMIT = 0.1; // HBAR; above this, a real product would ask the user.
-
-export async function runChat(userText, emit) {
+export async function runChat(userText, emit, agent) {
   const messages = [
     { role: "system", content: SYSTEM },
     { role: "user", content: userText },
@@ -40,17 +38,19 @@ export async function runChat(userText, emit) {
 
         emit({ type: "chat-step", phase: "start", tool: name, price: tool.price });
 
-        // Settle the real on-chain payment for this tool call.
+        // Settle the real on-chain payment from the user's own agent account.
         let pay;
         try {
-          pay = await payProvider(tool.provider, tool.price);
+          pay = await payFrom(agent.client, agent.accountId, tool.provider, tool.price);
         } catch (e) {
-          emit({ type: "chat-step", phase: "error", tool: name, message: String(e.message || e) });
-          messages.push({ role: "tool", tool_call_id: tc.id, content: "payment failed" });
+          const msg = String(e.message || e);
+          const funds = /INSUFFICIENT_ACCOUNT_BALANCE|INSUFFICIENT_PAYER_BALANCE/.test(msg);
+          emit({ type: "chat-step", phase: "error", tool: name, message: funds ? "agent budget exhausted (on-chain limit reached)" : msg });
+          messages.push({ role: "tool", tool_call_id: tc.id, content: funds ? "payment declined: the agent has no funds left" : "payment failed" });
           continue;
         }
-        emit({ type: "chat-step", phase: "paid", tool: name, price: tool.price, hashscan: pay.hashscan, txId: pay.txId });
-        emitEvent({ type: "payment", from: "YOU", to: name, amount: tool.price, hashscan: pay.hashscan, service: name });
+        emit({ type: "chat-step", phase: "paid", tool: name, price: tool.price, hashscan: pay.hashscan, txId: pay.txId, from: agent.accountId });
+        emitEvent({ type: "payment", from: agent.accountId, to: name, amount: tool.price, hashscan: pay.hashscan, service: name });
 
         // Run the actual service work.
         let result;

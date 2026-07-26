@@ -11,6 +11,7 @@ import { bus, recentEvents } from "./src/bus.js";
 import { agentList, topic } from "./src/agents.js";
 import { runChat } from "./src/chat.js";
 import { TOOLS } from "./src/tools.js";
+import { getOrCreateUserAgent, userClient } from "./src/userAgents.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3005;
@@ -81,7 +82,15 @@ wss.on("connection", (ws) => {
     try { data = JSON.parse(raw.toString()); } catch (_) { return; }
     if (data.type === "chat" && typeof data.text === "string") {
       const emit = (evt) => { if (ws.readyState === 1) ws.send(JSON.stringify(evt)); };
-      await runChat(data.text.slice(0, 2000), emit);
+      try {
+        emit({ type: "agent-preparing" });
+        const record = await getOrCreateUserAgent(data.user);
+        const client = userClient(record);
+        emit({ type: "agent-info", accountId: record.accountId, created: record.created });
+        await runChat(data.text.slice(0, 2000), emit, { client, accountId: record.accountId });
+      } catch (e) {
+        emit({ type: "chat-error", message: String(e.message || e) });
+      }
     }
   });
 });
