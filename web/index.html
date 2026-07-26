@@ -49,6 +49,11 @@ h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;-
 .trust{margin-top:34px;display:flex;align-items:center;gap:18px;color:var(--fg-subtle);font-size:13px;flex-wrap:wrap}
 .trust b{color:var(--fg-muted);font-weight:500}
 .sepdot{width:4px;height:4px;border-radius:50%;background:var(--border-2)}
+.badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--success);border:1px solid rgba(34,197,94,.4);border-radius:8px;padding:6px 11px;margin-bottom:24px}
+.badge svg{width:13px;height:13px;color:var(--success)}
+.stats{margin-top:36px;display:flex;gap:40px}
+.stat .sv{font-family:var(--font-mono);font-size:26px;font-weight:600;color:var(--success)}
+.stat .sl{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--fg-subtle);margin-top:2px}
 
 /* hero chat preview */
 .chatcard{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 40px 90px -40px rgba(0,0,0,.9)}
@@ -76,13 +81,14 @@ h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;-
 .section .lead{text-align:center;color:var(--fg-muted);max-width:560px;margin:0 auto 52px;font-size:15px}
 
 .team{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-.tcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;transition:200ms var(--ease)}
-.tcard:hover{border-color:var(--border-2);transform:translateY(-3px)}
+.tcard{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;transition:200ms var(--ease)}
+.tcard::after{content:"";position:absolute;top:20px;right:20px;width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 9px var(--success)}
+.tcard:hover{border-color:rgba(34,197,94,.5);box-shadow:0 0 36px -12px var(--success);transform:translateY(-3px)}
 .tcard .top{display:flex;align-items:center;gap:13px;margin-bottom:12px}
-.tav{width:52px;height:52px;border-radius:14px;overflow:hidden;flex-shrink:0}
+.tav{width:52px;height:52px;border-radius:14px;overflow:hidden;flex-shrink:0;background:var(--surface-2)}
 .tav img{width:100%;height:100%;display:block}
 .tcard .nm{font-size:16px;font-weight:700}
-.tcard .rl{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.tcard .rl{font-family:var(--font-mono);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.8px}
 .tcard p{font-size:13.5px;color:var(--fg-muted)}
 
 .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
@@ -136,23 +142,29 @@ footer .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 
 <header class="hero"><div class="wrap hero-grid">
   <div>
+    <div class="badge"><i data-lucide="hexagon"></i>Autonomous agent network</div>
     <h1>Meet <span class="g">Wire</span> — your AI that <span class="g">hires expert agents.</span></h1>
     <p class="sub">Ask in plain language. Wire hires the right specialist for the job and pays it on Hedera — real data, real answers.</p>
     <div class="cta">
       <button class="btn btn-p" onclick="openWallet()"><i data-lucide="wallet"></i>Connect wallet to start</button>
       <a href="#how" class="btn btn-g"><i data-lucide="play"></i>How it works</a>
     </div>
+    <div class="stats">
+      <div class="stat"><div class="sv">6</div><div class="sl">Agents</div></div>
+      <div class="stat"><div class="sv">Live</div><div class="sl">Data</div></div>
+      <div class="stat"><div class="sv">Hedera</div><div class="sl">Settled</div></div>
+    </div>
   </div>
 
   <div class="chatcard">
     <div class="cc-head"><span class="d" style="background:#EF4444"></span><span class="d" style="background:#FBBF24"></span><span class="d" style="background:#22C55E"></span><span class="t">Wire · Assistant</span><span class="net">Hedera</span></div>
     <div class="cc-body">
-      <div class="row"><div class="av"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=you-demo&radius=25&backgroundColor=F59E0B"></div><div><div class="who">You</div><div class="bub">Scan the token SAUCE — is it safe?</div></div></div>
-      <div class="row"><div class="av"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Wire%20the%20Commander&radius=25&backgroundColor=22C55E"></div><div style="flex:1"><div class="who">Wire</div><div class="bub" style="margin-bottom:8px">On it — hiring my market scanner.</div>
-        <div class="hire"><div class="r"><div class="av"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Eagleton%20Skywatcher&radius=25&backgroundColor=2DD4BF"></div><div><div class="nm">Eagleton Skywatcher</div><div class="rl">Navigator · Token scan</div></div><div class="pr">0.03 ℏ</div></div>
+      <div class="row"><div class="av"><img src="https://api.dicebear.com/9.x/adventurer/svg?seed=you-demo&radius=25&backgroundColor=F59E0B"></div><div><div class="who">You</div><div class="bub">Scan the token SAUCE — is it safe?</div></div></div>
+      <div class="row"><div class="av"><img src="https://api.dicebear.com/9.x/adventurer/svg?seed=Wire%20the%20Commander&radius=25&backgroundColor=22C55E"></div><div style="flex:1"><div class="who">Wire</div><div class="bub" style="margin-bottom:8px">On it — hiring my market scanner.</div>
+        <div class="hire"><div class="r"><div class="av"><img src="https://api.dicebear.com/9.x/adventurer/svg?seed=Eagleton%20Skywatcher&radius=25&backgroundColor=2DD4BF"></div><div><div class="nm">Eagleton Skywatcher</div><div class="rl">Navigator · Token scan</div></div><div class="pr">0.03 ℏ</div></div>
           <div class="paid"><span class="ok"><i data-lucide="check-circle" style="width:13px;height:13px"></i>Paid on Hedera</span><a href="#">HashScan <i data-lucide="external-link" style="width:11px;height:11px"></i></a></div></div>
       </div></div>
-      <div class="row"><div class="av"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Wire%20the%20Commander&radius=25&backgroundColor=22C55E"></div><div><div class="who">Wire</div><div class="bub"><b>SAUCE</b> looks healthy — deep liquidity, steady volume, no red flags. ✅</div></div></div>
+      <div class="row"><div class="av"><img src="https://api.dicebear.com/9.x/adventurer/svg?seed=Wire%20the%20Commander&radius=25&backgroundColor=22C55E"></div><div><div class="who">Wire</div><div class="bub"><b>SAUCE</b> looks healthy — deep liquidity, steady volume, no red flags. ✅</div></div></div>
     </div>
   </div>
 </div></header>
@@ -162,12 +174,12 @@ footer .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
   <h2>Six specialist agents, on call</h2>
   <p class="lead">Each agent does something an AI can't do on its own — live market data, on-chain intelligence, real research. Wire hires and pays them per task.</p>
   <div class="team">
-    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Eagleton%20Skywatcher&radius=25&backgroundColor=2DD4BF"></div><div><div class="nm">Eagleton Skywatcher</div><div class="rl" style="color:#2DD4BF">Navigator</div></div></div><p>Scans any token's real liquidity, volume and red flags.</p></div>
-    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Luna%20Mysticfang&radius=25&backgroundColor=F59E0B"></div><div><div class="nm">Luna Mysticfang</div><div class="rl" style="color:#F59E0B">Oracle</div></div></div><p>Reads the live market mood: Fear &amp; Greed plus what's trending.</p></div>
-    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Ursus%20Guardian&radius=25&backgroundColor=22C55E"></div><div><div class="nm">Ursus Guardian</div><div class="rl" style="color:#22C55E">Sentinel</div></div></div><p>Profiles any Hedera account: balance, tokens and activity.</p></div>
-    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Reynard%20Swift&radius=25&backgroundColor=EAB308"></div><div><div class="nm">Reynard Swift</div><div class="rl" style="color:#EAB308">Merchant</div></div></div><p>Quotes live token prices on SaucerSwap, Hedera's native DEX.</p></div>
-    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Corvus%20Messenger&radius=25&backgroundColor=FB923C"></div><div><div class="nm">Corvus Messenger</div><div class="rl" style="color:#FB923C">Glitch</div></div></div><p>Pulls multiple live sources on a topic for a grounded brief.</p></div>
-    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Athena%20Nightwing&radius=25&backgroundColor=38BDF8"></div><div><div class="nm">Athena Nightwing</div><div class="rl" style="color:#38BDF8">Archivist</div></div></div><p>Surfaces the largest recent HBAR transfers on the network.</p></div>
+    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/adventurer/svg?seed=Eagleton%20Skywatcher&radius=25&backgroundColor=2DD4BF"></div><div><div class="nm">Eagleton Skywatcher</div><div class="rl" style="color:#2DD4BF">Navigator</div></div></div><p>Scans any token's real liquidity, volume and red flags.</p></div>
+    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/adventurer/svg?seed=Luna%20Mysticfang&radius=25&backgroundColor=F59E0B"></div><div><div class="nm">Luna Mysticfang</div><div class="rl" style="color:#F59E0B">Oracle</div></div></div><p>Reads the live market mood: Fear &amp; Greed plus what's trending.</p></div>
+    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/adventurer/svg?seed=Ursus%20Guardian&radius=25&backgroundColor=22C55E"></div><div><div class="nm">Ursus Guardian</div><div class="rl" style="color:#22C55E">Sentinel</div></div></div><p>Profiles any Hedera account: balance, tokens and activity.</p></div>
+    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/adventurer/svg?seed=Reynard%20Swift&radius=25&backgroundColor=EAB308"></div><div><div class="nm">Reynard Swift</div><div class="rl" style="color:#EAB308">Merchant</div></div></div><p>Quotes live token prices on SaucerSwap, Hedera's native DEX.</p></div>
+    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/adventurer/svg?seed=Corvus%20Messenger&radius=25&backgroundColor=FB923C"></div><div><div class="nm">Corvus Messenger</div><div class="rl" style="color:#FB923C">Glitch</div></div></div><p>Pulls multiple live sources on a topic for a grounded brief.</p></div>
+    <div class="tcard"><div class="top"><div class="tav"><img src="https://api.dicebear.com/9.x/adventurer/svg?seed=Athena%20Nightwing&radius=25&backgroundColor=38BDF8"></div><div><div class="nm">Athena Nightwing</div><div class="rl" style="color:#38BDF8">Archivist</div></div></div><p>Surfaces the largest recent HBAR transfers on the network.</p></div>
   </div>
 </div></section>
 

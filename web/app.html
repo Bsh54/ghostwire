@@ -245,7 +245,7 @@ button{font-family:inherit}
         <div class="rh"><h3>Spend log</h3><span class="subtle" style="font-size:11px;text-transform:uppercase;letter-spacing:1px">on-chain</span></div>
         <div class="bud">
           <div class="budrow"><span class="muted"><i data-lucide="wallet" style="width:13px;height:13px;display:inline;vertical-align:-2px"></i> Agent balance</span><a class="mono" id="agBal" href="#" target="_blank">— ℏ</a></div>
-          <div class="budrow" style="margin-top:8px"><span class="muted"><i data-lucide="shield" style="width:13px;height:13px;display:inline;vertical-align:-2px"></i> Session cap</span><span class="capctl"><button class="capbtn" onclick="changeCap(-0.5)">−</button><input type="number" id="capInput" class="capin" min="0" step="0.5" onchange="setCapFromInput()" onkeydown="if(event.key==='Enter')this.blur()"><span class="subtle" style="font-size:11px">ℏ</span><button class="capbtn" onclick="changeCap(0.5)">+</button></span></div>
+          <div class="budrow" style="margin-top:8px"><span class="muted"><i data-lucide="shield" style="width:13px;height:13px;display:inline;vertical-align:-2px"></i> Session cap</span><span class="capctl"><input type="number" id="capInput" class="capin" min="0" step="0.5" onchange="setCapFromInput()" onkeydown="if(event.key==='Enter')this.blur()"><span class="subtle" style="font-size:11px">ℏ</span></span></div>
           <div class="bar"><i id="budBar" style="width:0%"></i></div>
           <div class="budrow" style="margin-top:6px"><span class="subtle" style="font-size:11px">Spent this session</span><span class="mono subtle" id="budTxt" style="font-size:11px">0.000 / 1.0 ℏ</span></div>
         </div>
@@ -259,7 +259,7 @@ button{font-family:inherit}
         <h1>The agent team</h1>
         <div class="sub">Wire commands a team of specialist agents. Each has its own Hedera account and charges per task — Wire hires and pays them on-chain over x402 as your requests come in.</div>
         <div class="commander">
-          <div class="cav"><img src="https://api.dicebear.com/9.x/notionists/svg?seed=Wire%20the%20Commander&radius=25&backgroundColor=22C55E" alt="Wire"></div>
+          <div class="cav"><img src="https://api.dicebear.com/9.x/adventurer/svg?seed=Wire%20the%20Commander&radius=25&backgroundColor=22C55E" alt="Wire"></div>
           <div><div class="cname">Wire · Commander</div><div class="cdesc">Coordinates the team and pays each specialist per task, autonomously.</div></div>
         </div>
         <div class="roster" id="grid"><div class="emptyr">Loading team…</div></div>
@@ -293,7 +293,7 @@ if(!s){ location.replace('index.html'); }
 lucide.createIcons();
 function shortAddr(a){ return a && a.startsWith('0x') && a.length>10 ? a.slice(0,6)+'…'+a.slice(-4) : a; }
 function shortAv(a){ return a ? (a.startsWith('0x') ? a.slice(2,4) : a.replace(/\D/g,'').slice(-2)).toUpperCase() : 'ME'; }
-const AV_STYLE='notionists';
+const AV_STYLE='adventurer';
 function avatar(name,accent){ const bg=(accent||'#1B2438').replace('#',''); return `https://api.dicebear.com/9.x/${AV_STYLE}/svg?seed=${encodeURIComponent(name||'agent')}&radius=25&backgroundColor=${bg}`; }
 const WIRE_AV=avatar('Wire the Commander','22C55E');
 if(s){ const av=document.getElementById('acctAv'); av.innerHTML=`<img src="${avatar(s.account,'F59E0B')}" alt="">`; av.title=s.account; }
