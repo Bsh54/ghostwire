@@ -45,7 +45,9 @@ button{font-family:inherit}
 .iconbtn{width:38px;height:38px;border-radius:9px;border:none;background:var(--surface-2);color:var(--fg-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:140ms}
 .iconbtn:hover{background:var(--surface-3);color:var(--danger)}
 .iconbtn svg{width:17px;height:17px}
-.av{width:34px;height:34px;border-radius:50%;background:var(--surface-3);border:2px solid var(--value);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+.av{width:34px;height:34px;border-radius:50%;background:var(--surface-3);border:2px solid var(--value);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;overflow:hidden}
+.aav img,.si img,.ava img,.hi img,.cav img,.av img{width:100%;height:100%;display:block;border-radius:inherit;object-fit:cover}
+.sp .spav{width:20px;height:20px;border-radius:6px;flex-shrink:0}
 
 /* ===== content ===== */
 .content{flex:1;min-height:0;position:relative}
@@ -245,7 +247,7 @@ button{font-family:inherit}
         <h1>The agent team</h1>
         <div class="sub">Wire commands a team of specialist agents. Each has its own Hedera account and charges per task — Wire hires and pays them on-chain over x402 as your requests come in.</div>
         <div class="commander">
-          <div class="cav"><i data-lucide="crown"></i></div>
+          <div class="cav"><img src="https://api.dicebear.com/9.x/bottts/svg?seed=Wire%20the%20Commander&radius=25&backgroundColor=22C55E" alt="Wire"></div>
           <div><div class="cname">Wire · Commander</div><div class="cdesc">Coordinates the team and pays each specialist per task, autonomously.</div></div>
         </div>
         <div class="roster" id="grid"><div class="emptyr">Loading team…</div></div>
@@ -279,7 +281,9 @@ if(!s){ location.replace('index.html'); }
 lucide.createIcons();
 function shortAddr(a){ return a && a.startsWith('0x') && a.length>10 ? a.slice(0,6)+'…'+a.slice(-4) : a; }
 function shortAv(a){ return a ? (a.startsWith('0x') ? a.slice(2,4) : a.replace(/\D/g,'').slice(-2)).toUpperCase() : 'ME'; }
-if(s){ const av=document.getElementById('acctAv'); av.textContent=shortAv(s.account); av.title=s.account; }
+function avatar(name,accent){ const bg=(accent||'#1B2438').replace('#',''); return `https://api.dicebear.com/9.x/bottts/svg?seed=${encodeURIComponent(name||'agent')}&radius=25&backgroundColor=${bg}`; }
+const WIRE_AV=avatar('Wire the Commander','22C55E');
+if(s){ const av=document.getElementById('acctAv'); av.innerHTML=`<img src="${avatar(s.account,'F59E0B')}" alt="">`; av.title=s.account; }
 function logout(){ localStorage.removeItem('ghostwire.session'); location.href='index.html'; }
 
 const ICONS={market_price:'radar',summarize:'scroll-text',analyze:'line-chart',risk_check:'shield',web_scout:'radio'};
@@ -355,7 +359,7 @@ function newChat(){ showChat(); currentConv=null; msgs.innerHTML=''; showWelcome
 /* rendering */
 function showWelcome(){
   msgs.innerHTML=`<div class="welcome">
-    <div class="hi"><i data-lucide="zap"></i></div>
+    <div class="hi"><img src="${WIRE_AV}" alt="Wire"></div>
     <h1>Hey, I'm Wire.</h1>
     <p>Give me a task — I'll hire and pay the services I need, for real, on Hedera.</p>
     <div class="cards">
@@ -369,12 +373,12 @@ function showWelcome(){
 function addUser(text){
   if(msgs.querySelector('.welcome'))msgs.innerHTML='';
   const d=document.createElement('div');d.className='msg user';
-  d.innerHTML=`<div class="ava">${shortAv(s.account)}</div><div class="body"><div class="who">You</div><div class="content"></div></div>`;
+  d.innerHTML=`<div class="ava"><img src="${avatar(s.account,'F59E0B')}" alt="you"></div><div class="body"><div class="who">You</div><div class="content"></div></div>`;
   d.querySelector('.content').textContent=text;msgs.appendChild(d);scroll();
 }
 function addBot(content, steps){
   const d=document.createElement('div');d.className='msg bot';
-  d.innerHTML=`<div class="ava"><i data-lucide="zap"></i></div><div class="body"><div class="who">Wire</div><div class="steps"></div><div class="content"></div></div>`;
+  d.innerHTML=`<div class="ava"><img src="${WIRE_AV}" alt="Wire"></div><div class="body"><div class="who">Wire</div><div class="steps"></div><div class="content"></div></div>`;
   msgs.appendChild(d);
   const st=d.querySelector('.steps'); (steps||[]).forEach(step=>st.appendChild(renderStep(step,true)));
   d.querySelector('.content').innerHTML=md(content);
@@ -383,7 +387,7 @@ function addBot(content, steps){
 function renderStep(step, finished){
   const meta=META[step.tool]||{}; const p=meta.persona||{}; const ac=p.accent;
   const c=document.createElement('div');c.className='step';
-  c.innerHTML=`<div class="r"><div class="si" ${ac?`style="background:${ac}22"`:''}><i data-lucide="${p.icon||ICONS[step.tool]||'wrench'}" ${ac?`style="color:${ac}"`:''}></i></div>
+  c.innerHTML=`<div class="r"><div class="si"><img src="${avatar(p.name||step.tool,ac)}" alt=""></div>
     <div><div class="st">${p.name||step.tool.replace('_',' ')}</div><div class="sd">${p.role?p.role+' · ':''}${meta.description||''}</div></div>
     <div class="pr">${step.price} ℏ</div></div>
     <div class="paid">${finished?paidHtml(step):`<span class="think"><span class="dots"><i></i><i></i><i></i></span> hiring &amp; paying on Hedera…</span>`}</div>`;
@@ -404,7 +408,7 @@ function addSpend(tool,amt,link){
   if(spend.querySelector('.emptyr'))spend.innerHTML='';
   const p=(META[tool]||{}).persona||{};
   const d=document.createElement('div');d.className='sp';
-  d.innerHTML=`<span class="d"></span><span class="f"><b>${p.name||tool.replace('_',' ')}</b></span><a class="a" href="${link}" target="_blank">+${amt}</a>`;
+  d.innerHTML=`<img class="spav" src="${avatar(p.name||tool,p.accent)}" alt=""><span class="f"><b>${p.name||tool.replace('_',' ')}</b></span><a class="a" href="${link}" target="_blank">+${amt}</a>`;
   spend.prepend(d);
   used+=parseFloat(amt);document.getElementById('budTxt').textContent=used.toFixed(3)+' ℏ';document.getElementById('budBar').style.width=Math.min(100,used*100)+'%';
 }
@@ -457,7 +461,7 @@ fetch('/api/tools').then(r=>r.json()).then(tools=>{
     const p=t.persona||{}; const ac=p.accent||'#2DD4BF';
     return `<div class="agentcard">
       <div class="ahead">
-        <div class="aav" style="background:linear-gradient(135deg,${ac},${ac}99);box-shadow:0 0 24px -8px ${ac}"><i data-lucide="${p.icon||'wrench'}"></i></div>
+        <div class="aav" style="box-shadow:0 0 24px -8px ${ac}"><img src="${avatar(p.name||t.name,ac)}" alt="${p.name||t.name}"></div>
         <div><div class="aname">${p.name||t.name}</div><div class="arole" style="color:${ac}">${p.role||'Agent'}</div></div>
       </div>
       <div class="ablurb">${p.blurb||t.description}</div>
