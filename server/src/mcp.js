@@ -4,8 +4,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { z } from "zod";
-import { TOOLS } from "./tools.js";
-import { payFrom } from "./pay.js";
+import { AGENTS } from "./registry.js";
+import { hire } from "./hire.js";
 import { getClient, OPERATOR_ID } from "./hedera.js";
 
 const operator = getClient();
@@ -22,16 +22,16 @@ function zshape(params) {
 
 function build() {
   const server = new McpServer({ name: "ghostwire", version: "1.0.0" });
-  for (const [name, t] of Object.entries(TOOLS)) {
-    server.tool(name, t.def.function.description, zshape(t.def.function.parameters), async (args) => {
-      let note = "";
+  for (const [name, a] of Object.entries(AGENTS)) {
+    server.tool(name, a.def.function.description, zshape(a.def.function.parameters), async (args) => {
+      let result = "", note = "";
       try {
-        const pay = await payFrom(operator, OPERATOR_ID, t.provider, t.price);
-        note = `\n\n[settled ${t.price} HBAR on Hedera testnet · ${pay.hashscan}]`;
+        const out = await hire(a.path, args, { client: operator, accountId: OPERATOR_ID });
+        result = out.result;
+        note = out.hashscan ? `\n\n[settled ${out.amount} HBAR on Hedera testnet · ${out.hashscan}]` : "";
       } catch (e) {
-        note = `\n\n[payment error: ${e.message}]`;
+        result = "(error contacting agent: " + (e.message || e) + ")";
       }
-      const result = await t.run(args);
       return { content: [{ type: "text", text: String(result) + note }] };
     });
   }

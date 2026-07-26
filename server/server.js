@@ -10,7 +10,7 @@ import { paymentRequired, verifyPayment } from "./src/x402.js";
 import { bus, recentEvents } from "./src/bus.js";
 import { agentList, topic } from "./src/agents.js";
 import { runChat } from "./src/chat.js";
-import { TOOLS } from "./src/tools.js";
+import { AGENTS } from "./src/registry.js";
 import { getOrCreateUserAgent, userClient, getBalance } from "./src/userAgents.js";
 import * as store from "./src/store.js";
 import { getBudget, setCap } from "./src/budget.js";
@@ -54,12 +54,12 @@ app.delete("/api/conversation/:id", (req, res) => { store.remove(req.params.id);
 // The real paid tools the assistant can hire (for the marketplace UI).
 app.get("/api/tools", (_req, res) => {
   res.json(
-    Object.entries(TOOLS).map(([name, t]) => ({
+    Object.entries(AGENTS).map(([name, a]) => ({
       name,
-      price: t.price,
-      provider: t.provider,
-      description: t.def.function.description,
-      persona: t.persona,
+      price: a.price,
+      provider: a.account,
+      description: a.def.function.description,
+      persona: a.persona,
     })),
   );
 });

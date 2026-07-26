@@ -1,8 +1,8 @@
 // The assistant loop: DeepSeek decides which paid tools to use, each tool call
 // settles a real Hedera payment before running, and every step is streamed out.
 import { chatCompletion } from "./llm.js";
-import { TOOLS, TOOL_DEFS } from "./tools.js";
-import { payFrom } from "./pay.js";
+import { AGENTS, TOOL_DEFS } from "./registry.js";
+import { hire } from "./hire.js";
 import { emitEvent } from "./bus.js";
 import { canSpend, record } from "./budget.js";
 
@@ -40,45 +40,39 @@ export async function runChat(userText, emit, agent, history = []) {
     if (msg.tool_calls && msg.tool_calls.length) {
       for (const tc of msg.tool_calls) {
         const name = tc.function.name;
-        const tool = TOOLS[name];
+        const spec = AGENTS[name];
         let args = {};
         try { args = JSON.parse(tc.function.arguments || "{}"); } catch (_) {}
-        if (!tool) {
-          messages.push({ role: "tool", tool_call_id: tc.id, content: "unknown tool" });
+        if (!spec) {
+          messages.push({ role: "tool", tool_call_id: tc.id, content: "unknown agent" });
           continue;
         }
 
-        emit({ type: "chat-step", phase: "start", tool: name, price: tool.price });
+        emit({ type: "chat-step", phase: "start", tool: name, price: spec.price });
 
-        // Guardrail: enforce the user's session budget cap before any money moves.
-        if (!canSpend(agent.user, tool.price)) {
-          emit({ type: "chat-step", phase: "blocked", tool: name, price: tool.price, reason: "session budget cap reached" });
-          steps.push({ tool: name, price: tool.price, status: "blocked" });
+        // Guardrail: enforce the user's session budget cap before contacting the agent.
+        if (!canSpend(agent.user, spec.price)) {
+          emit({ type: "chat-step", phase: "blocked", tool: name, price: spec.price, reason: "session budget cap reached" });
+          steps.push({ tool: name, price: spec.price, status: "blocked" });
           messages.push({ role: "tool", tool_call_id: tc.id, content: "payment blocked: the user's session budget cap was reached. Tell the user to raise the cap to continue." });
           continue;
         }
 
-        // Settle the real on-chain payment from the user's own agent account.
-        let pay;
+        // Contact the independent agent over x402: 402 -> pay on Hedera -> proof -> result.
         try {
-          pay = await payFrom(agent.client, agent.accountId, tool.provider, tool.price);
+          const out = await hire(spec.path, args, { client: agent.client, accountId: agent.accountId });
+          record(agent.user, spec.price);
+          emit({ type: "chat-step", phase: "paid", tool: name, price: spec.price, hashscan: out.hashscan, txId: out.txId, from: agent.accountId });
+          steps.push({ tool: name, price: spec.price, hashscan: out.hashscan, status: "paid" });
+          emitEvent({ type: "payment", from: agent.accountId, to: name, amount: spec.price, hashscan: out.hashscan, service: name });
+          emit({ type: "chat-step", phase: "done", tool: name });
+          messages.push({ role: "tool", tool_call_id: tc.id, content: String(out.result).slice(0, 4000) });
         } catch (e) {
-          const msg = String(e.message || e);
-          const funds = /INSUFFICIENT_ACCOUNT_BALANCE|INSUFFICIENT_PAYER_BALANCE/.test(msg);
-          emit({ type: "chat-step", phase: "error", tool: name, message: funds ? "agent budget exhausted (on-chain limit reached)" : msg });
-          messages.push({ role: "tool", tool_call_id: tc.id, content: funds ? "payment declined: the agent has no funds left" : "payment failed" });
-          continue;
+          const m = String(e.message || e);
+          const funds = /INSUFFICIENT_ACCOUNT_BALANCE|INSUFFICIENT_PAYER_BALANCE/.test(m);
+          emit({ type: "chat-step", phase: "error", tool: name, message: funds ? "agent budget exhausted (on-chain limit reached)" : m });
+          messages.push({ role: "tool", tool_call_id: tc.id, content: funds ? "payment declined: the agent has no funds left" : "hiring the agent failed" });
         }
-        record(agent.user, tool.price);
-        emit({ type: "chat-step", phase: "paid", tool: name, price: tool.price, hashscan: pay.hashscan, txId: pay.txId, from: agent.accountId });
-        steps.push({ tool: name, price: tool.price, hashscan: pay.hashscan, status: "paid" });
-        emitEvent({ type: "payment", from: agent.accountId, to: name, amount: tool.price, hashscan: pay.hashscan, service: name });
-
-        // Run the actual service work.
-        let result;
-        try { result = await tool.run(args); } catch (e) { result = "(service error: " + e.message + ")"; }
-        emit({ type: "chat-step", phase: "done", tool: name });
-        messages.push({ role: "tool", tool_call_id: tc.id, content: String(result).slice(0, 4000) });
       }
       continue; // let the model use the tool results
     }
