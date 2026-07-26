@@ -1,6 +1,7 @@
 # ---- Sensitive / local only (NEVER commit) ----
 serveur.txt
 info.txt
+KEY.txt
 *.pem
 *.key
 *.ppk

@@ -8,7 +8,8 @@ import { fileURLToPath } from "url";
 import { SERVICES, getService } from "./src/marketplace.js";
 import { paymentRequired, verifyPayment } from "./src/x402.js";
 import { bus, recentEvents } from "./src/bus.js";
-import { agentList, topic, startEconomy } from "./src/agents.js";
+import { agentList, topic } from "./src/agents.js";
+import { runChat } from "./src/chat.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3005;
@@ -54,6 +55,14 @@ const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: "/ws" });
 wss.on("connection", (ws) => {
   ws.send(JSON.stringify({ type: "snapshot", agents: agentList(), topicId: topic(), recent: recentEvents() }));
+  ws.on("message", async (raw) => {
+    let data;
+    try { data = JSON.parse(raw.toString()); } catch (_) { return; }
+    if (data.type === "chat" && typeof data.text === "string") {
+      const emit = (evt) => { if (ws.readyState === 1) ws.send(JSON.stringify(evt)); };
+      await runChat(data.text.slice(0, 2000), emit);
+    }
+  });
 });
 bus.on("event", (evt) => {
   const msg = JSON.stringify({ type: "event", event: evt });
@@ -62,5 +71,4 @@ bus.on("event", (evt) => {
 
 server.listen(PORT, () => {
   console.log(`Ghostwire server on :${PORT}`);
-  startEconomy(4000);
 });
