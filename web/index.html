@@ -256,42 +256,73 @@ footer .wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 <div class="overlay" id="walletModal">
   <div class="modal">
     <h3>Connect a wallet</h3>
-    <p>Your Hedera account is your identity on Ghostwire. No passwords, no sign-up.</p>
-    <div class="wallet-opt" onclick="connect('HashPack')">
-      <div class="wic">HP</div>
-      <div><div class="wn">HashPack</div><div class="wd">Most popular Hedera wallet</div></div>
-      <i data-lucide="chevron-right" class="arw"></i>
-    </div>
-    <div class="wallet-opt" onclick="connect('Blade')">
-      <div class="wic">BL</div>
-      <div><div class="wn">Blade</div><div class="wd">Hedera-native wallet</div></div>
-      <i data-lucide="chevron-right" class="arw"></i>
-    </div>
-    <div class="wallet-opt" onclick="connect('WalletConnect')">
-      <div class="wic">WC</div>
-      <div><div class="wn">WalletConnect</div><div class="wd">Connect any compatible wallet</div></div>
+    <p>Connect any EVM wallet to Hedera Testnet — your address is your identity. No passwords, no sign-up.</p>
+    <div id="walletList"></div>
+    <div class="wallet-opt" onclick="connectDemo()">
+      <div class="wic">GW</div>
+      <div><div class="wn">Continue without a wallet</div><div class="wd">Demo mode — explore the platform</div></div>
       <i data-lucide="chevron-right" class="arw"></i>
     </div>
     <div class="note">Testnet only — no real funds are used.</div>
   </div>
 </div>
 
-<script type="module" src="assets/wallet.js"></script>
 <script>
 lucide.createIcons();
 
-/* Wallet connection — real Hedera WalletConnect (loaded from assets/wallet.js).
-   Falls back to the demo modal only if the bundle is unavailable. */
-function openWallet(){
-  if (window.ghostwireConnect) { window.ghostwireConnect(); return; }
-  document.getElementById('walletModal').classList.add('on');
+/* Multi-wallet connection via EIP-6963 (auto-detects MetaMask, Coinbase, Rabby, Brave, OKX...) */
+const HEDERA_TESTNET = {
+  chainId: '0x128', // 296
+  chainName: 'Hedera Testnet',
+  nativeCurrency: { name: 'HBAR', symbol: 'HBAR', decimals: 18 },
+  rpcUrls: ['https://testnet.hashio.io/api'],
+  blockExplorerUrls: ['https://hashscan.io/testnet'],
+};
+const wallets = [];
+const seen = new Set();
+function addWallet(info, provider){
+  const key = info.uuid || info.name;
+  if (seen.has(key) || !provider) return;
+  seen.add(key); wallets.push({ info, provider }); renderWallets();
 }
+window.addEventListener('eip6963:announceProvider', e => addWallet(e.detail.info, e.detail.provider));
+window.dispatchEvent(new Event('eip6963:requestProvider'));
+setTimeout(() => { if (window.ethereum && !wallets.length) addWallet({ name: 'Browser Wallet', uuid: 'injected' }, window.ethereum); }, 350);
+
+function renderWallets(){
+  const el = document.getElementById('walletList');
+  if (!wallets.length) { el.innerHTML = '<div class="note" style="margin:0 0 10px">No wallet detected. Install MetaMask, or use demo mode below.</div>'; return; }
+  el.innerHTML = wallets.map((w,i)=>`
+    <div class="wallet-opt" onclick="connectWallet(${i})">
+      <div class="wic">${w.info.icon ? `<img src="${w.info.icon}" alt="" style="width:24px;height:24px;border-radius:6px">` : w.info.name.slice(0,2).toUpperCase()}</div>
+      <div><div class="wn">${w.info.name}</div><div class="wd">EVM wallet on Hedera Testnet</div></div>
+      <i data-lucide="chevron-right" class="arw"></i>
+    </div>`).join('');
+  lucide.createIcons();
+}
+
+function openWallet(){ document.getElementById('walletModal').classList.add('on'); }
 document.getElementById('walletModal').addEventListener('click',e=>{ if(e.target.id==='walletModal') e.target.classList.remove('on'); });
-function connect(provider){
-  if (window.ghostwireConnect) { window.ghostwireConnect(); return; }
+
+async function connectWallet(i){
+  const eth = wallets[i]?.provider; if(!eth) return;
+  try{
+    const accounts = await eth.request({ method:'eth_requestAccounts' });
+    try{
+      await eth.request({ method:'wallet_switchEthereumChain', params:[{ chainId: HEDERA_TESTNET.chainId }] });
+    }catch(err){
+      const code = err.code || err?.data?.originalError?.code;
+      if(code === 4902){ await eth.request({ method:'wallet_addEthereumChain', params:[HEDERA_TESTNET] }); }
+    }
+    const account = accounts[0];
+    localStorage.setItem('ghostwire.session', JSON.stringify({ provider: wallets[i].info.name, account, at: Date.now() }));
+    location.href = 'app.html';
+  }catch(e){ /* user rejected */ }
+}
+function connectDemo(){
   const account = '0.0.' + (48000 + Math.floor(Math.random()*900));
-  localStorage.setItem('ghostwire.session', JSON.stringify({ provider, account, at: Date.now() }));
-  window.location.href = 'app.html';
+  localStorage.setItem('ghostwire.session', JSON.stringify({ provider:'demo', account, at: Date.now() }));
+  location.href = 'app.html';
 }
 
 /* Hero network animation */

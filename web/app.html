@@ -186,7 +186,9 @@ a{color:var(--info);text-decoration:none}
 const s = JSON.parse(localStorage.getItem('ghostwire.session') || 'null');
 if(!s){ location.replace('index.html'); }
 lucide.createIcons();
-if(s){ document.getElementById('acctId').textContent=s.account; document.getElementById('acctAv').textContent=s.account.replace(/\D/g,'').slice(-2); }
+function shortAddr(a){ return a && a.startsWith('0x') && a.length>10 ? a.slice(0,6)+'…'+a.slice(-4) : a; }
+function shortAv(a){ return a ? (a.startsWith('0x') ? a.slice(2,4) : a.replace(/\D/g,'').slice(-2)).toUpperCase() : 'ME'; }
+if(s){ document.getElementById('acctId').textContent=shortAddr(s.account); document.getElementById('acctAv').textContent=shortAv(s.account); }
 function logout(){ localStorage.removeItem('ghostwire.session'); location.href='index.html'; }
 
 // nav
@@ -224,7 +226,7 @@ function connect(){
 connect();
 
 function scroll(){msgs.scrollTop=msgs.scrollHeight;}
-function userMsg(t){const d=document.createElement('div');d.className='m user';d.innerHTML=`<div class="av">${(s?s.account:'').replace(/\D/g,'').slice(-2)||'ME'}</div><div class="bubble"></div>`;d.querySelector('.bubble').textContent=t;msgs.appendChild(d);scroll();}
+function userMsg(t){const d=document.createElement('div');d.className='m user';d.innerHTML=`<div class="av">${s?shortAv(s.account):'ME'}</div><div class="bubble"></div>`;d.querySelector('.bubble').textContent=t;msgs.appendChild(d);scroll();}
 function botBubble(){const d=document.createElement('div');d.className='m bot';d.innerHTML=`<div class="av">GW</div><div class="bubble"><div class="plan"><span class="dots"><i></i><i></i><i></i></span> thinking…</div></div>`;msgs.appendChild(d);scroll();return d.querySelector('.bubble');}
 
 function addSpend(name,amt,link){
