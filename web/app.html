@@ -145,6 +145,9 @@ button{font-family:inherit}
 .capctl{display:flex;align-items:center;gap:7px}
 .capbtn{width:22px;height:22px;border-radius:6px;border:1px solid var(--border-2);background:var(--surface-2);color:var(--fg);cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center}
 .capbtn:hover{background:var(--surface-3);border-color:var(--agent)}
+.capin{width:52px;background:var(--surface-2);border:1px solid var(--border-2);border-radius:6px;color:var(--value);font-family:var(--font-mono);font-size:13px;padding:3px 6px;text-align:right;outline:none}
+.capin:focus{border-color:var(--agent)}
+.capin::-webkit-inner-spin-button{opacity:.4}
 .step .blk{color:var(--danger);display:flex;align-items:center;gap:5px;font-weight:500}
 .bar{height:7px;background:var(--surface-3);border-radius:4px;overflow:hidden;margin-top:8px}
 .bar>i{display:block;height:100%;background:var(--grad);border-radius:4px;transition:width .4s}
@@ -242,7 +245,7 @@ button{font-family:inherit}
         <div class="rh"><h3>Spend log</h3><span class="subtle" style="font-size:11px;text-transform:uppercase;letter-spacing:1px">on-chain</span></div>
         <div class="bud">
           <div class="budrow"><span class="muted"><i data-lucide="wallet" style="width:13px;height:13px;display:inline;vertical-align:-2px"></i> Agent balance</span><a class="mono" id="agBal" href="#" target="_blank">— ℏ</a></div>
-          <div class="budrow" style="margin-top:8px"><span class="muted"><i data-lucide="shield" style="width:13px;height:13px;display:inline;vertical-align:-2px"></i> Session cap</span><span class="capctl"><button class="capbtn" onclick="changeCap(-0.5)">−</button><span class="mono" id="capTxt">1.0</span><span class="subtle" style="font-size:11px">ℏ</span><button class="capbtn" onclick="changeCap(0.5)">+</button></span></div>
+          <div class="budrow" style="margin-top:8px"><span class="muted"><i data-lucide="shield" style="width:13px;height:13px;display:inline;vertical-align:-2px"></i> Session cap</span><span class="capctl"><button class="capbtn" onclick="changeCap(-0.5)">−</button><input type="number" id="capInput" class="capin" min="0" step="0.5" onchange="setCapFromInput()" onkeydown="if(event.key==='Enter')this.blur()"><span class="subtle" style="font-size:11px">ℏ</span><button class="capbtn" onclick="changeCap(0.5)">+</button></span></div>
           <div class="bar"><i id="budBar" style="width:0%"></i></div>
           <div class="budrow" style="margin-top:6px"><span class="subtle" style="font-size:11px">Spent this session</span><span class="mono subtle" id="budTxt" style="font-size:11px">0.000 / 1.0 ℏ</span></div>
         </div>
@@ -307,22 +310,21 @@ async function refreshAgent(){
     if(typeof a.cap==='number')cap=a.cap;
     if(typeof a.spent==='number')spent=a.spent;
     const bal=document.getElementById('agBal');
-    if(bal){ bal.textContent=(a.balance!=null?a.balance.toFixed(3):'—')+' ℏ'; bal.href='https://hashscan.io/testnet/account/'+a.accountId; }
+    if(bal){ if(a.balance!=null) bal.textContent=a.balance.toFixed(3)+' ℏ'; bal.href='https://hashscan.io/testnet/account/'+a.accountId; }
     updateBudUI();
   }catch(_){}
 }
 function updateBudUI(){
-  const ct=document.getElementById('capTxt'), bt=document.getElementById('budTxt'), bar=document.getElementById('budBar');
-  if(!ct)return;
-  ct.textContent=cap.toFixed(1);
+  const ci=document.getElementById('capInput'), bt=document.getElementById('budTxt'), bar=document.getElementById('budBar');
+  if(!ci)return;
+  if(document.activeElement!==ci) ci.value=cap.toFixed(1);
   bt.textContent=spent.toFixed(3)+' / '+cap.toFixed(1)+' ℏ';
   bar.style.width=Math.min(100,cap>0?(spent/cap)*100:0)+'%';
   bar.style.background = spent>=cap-1e-9 ? 'var(--danger)' : 'var(--grad)';
 }
-async function changeCap(delta){
-  cap=Math.max(0,+(cap+delta).toFixed(1)); updateBudUI();
-  try{ await fetch('/api/budget',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user:s.account,cap})}); }catch(_){}
-}
+async function postCap(){ try{ await fetch('/api/budget',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user:s.account,cap})}); }catch(_){} }
+function setCapFromInput(){ const v=parseFloat(document.getElementById('capInput').value); if(!isNaN(v)&&v>=0){ cap=+v.toFixed(2); updateBudUI(); postCap(); } }
+function changeCap(delta){ cap=Math.max(0,+(cap+delta).toFixed(1)); updateBudUI(); postCap(); }
 
 /* tabs */
 document.querySelectorAll('.tab[data-v]').forEach(n=>n.onclick=()=>setView(n.dataset.v));
